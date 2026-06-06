@@ -57,13 +57,13 @@ const jsonLd = {
   priceRange: "$$",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "4567 Rue Saint-Denis",
+    streetAddress: "150 Avenue du Mont-Royal E",
     addressLocality: "Montréal",
     addressRegion: "QC",
-    postalCode: "H2J 2L4",
+    postalCode: "H2T 1P1",
     addressCountry: "CA",
   },
-  telephone: "+15145550101",
+  telephone: "+14383834034",
   openingHoursSpecification: [
     { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday"], opens: "12:00", closes: "22:00" },
     { "@type": "OpeningHoursSpecification", dayOfWeek: ["Friday", "Saturday"], opens: "12:00", closes: "23:00" },

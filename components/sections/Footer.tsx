@@ -55,13 +55,13 @@ export function Footer() {
 
             {/* Address */}
             <a
-              href="https://maps.google.com/?q=Le+Blueboy+Artisan+Glacier+Montreal"
+              href="https://maps.google.com/?q=150+Avenue+du+Mont-Royal+E,+Montréal,+QC+H2T+1P1"
               target="_blank"
               rel="noopener noreferrer"
               className="block text-cream/50 hover:text-cream text-sm leading-relaxed transition-colors mb-5"
             >
-              4567 Rue Saint-Denis<br />
-              Montréal, QC H2J 2L4
+              150 Avenue du Mont-Royal E<br />
+              Montréal, QC H2T 1P1
             </a>
 
             {/* Hours */}
@@ -76,10 +76,10 @@ export function Footer() {
 
             {/* Phone */}
             <a
-              href="tel:+15145550101"
+              href="tel:+14383834034"
               className="block text-cream/50 hover:text-cream text-sm transition-colors mb-6"
             >
-              (514) 555-0101
+              (438) 383-4034
             </a>
 
             <a
