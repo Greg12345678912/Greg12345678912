@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, Component } from "react";
+import type { ReactNode } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
@@ -8,6 +9,16 @@ import { SCENES } from "@/lib/scenes";
 import { useDevice } from "@/lib/useDevice";
 import { useSceneAmbient } from "@/lib/useSceneAmbient";
 import { useStore } from "@/store/useStore";
+
+class CanvasErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(err: Error) { console.error("[JourneyCanvas] render error:", err.message); }
+  render() {
+    if (this.state.failed) return null;
+    return this.props.children;
+  }
+}
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -398,7 +409,9 @@ export function JourneyScroller() {
 
         {/* R3F canvas */}
         <div className="absolute inset-0 z-0">
-          <JourneyCanvas activeSceneIndex={activeScene} isMobile={isMobile} />
+          <CanvasErrorBoundary>
+            <JourneyCanvas activeSceneIndex={activeScene} isMobile={isMobile} />
+          </CanvasErrorBoundary>
         </div>
 
         {/* Ambient */}

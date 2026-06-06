@@ -1,10 +1,17 @@
 "use client";
 
-import { Suspense, useRef, useEffect } from "react";
+import { Suspense, useRef, useEffect, Component } from "react";
+import type { ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, ContactShadows, Float } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
+
+class PostFXBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? null : this.props.children; }
+}
 import { SCENES, getSceneItem } from "@/lib/scenes";
 import type { SceneDefinition } from "@/lib/scenes";
 import { IceCreamCone } from "@/components/three/IceCreamCone";
@@ -248,16 +255,18 @@ function SceneContent({
       <Environment preset="night" />
 
       {!isMobile && (
-        <EffectComposer>
-          <Bloom
-            intensity={0.8}
-            luminanceThreshold={0.45}
-            luminanceSmoothing={0.88}
-            radius={0.8}
-            mipmapBlur
-          />
-          <Vignette eskil={false} offset={0.1} darkness={0.75} />
-        </EffectComposer>
+        <PostFXBoundary>
+          <EffectComposer>
+            <Bloom
+              intensity={0.8}
+              luminanceThreshold={0.45}
+              luminanceSmoothing={0.88}
+              radius={0.8}
+              mipmapBlur
+            />
+            <Vignette eskil={false} offset={0.1} darkness={0.75} />
+          </EffectComposer>
+        </PostFXBoundary>
       )}
     </>
   );
