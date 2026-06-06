@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useStore } from "@/store/useStore";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,20 +11,12 @@ export function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { audioEnabled, toggleAudio } = useStore();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
-
-    // Entrance animation
-    gsap.from(navRef.current, {
-      y: -20,
-      opacity: 0,
-      duration: 0.8,
-      delay: 0.5,
-      ease: "power3.out",
-    });
-
+    gsap.from(navRef.current, { y: -20, opacity: 0, duration: 0.8, delay: 0.5, ease: "power3.out" });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -41,7 +34,6 @@ export function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Logo */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="flex items-center gap-2"
@@ -54,8 +46,7 @@ export function Navbar() {
             </span>
           </button>
 
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             <button
               onClick={() => scrollTo("menu")}
               className="text-cream/60 hover:text-cream text-sm transition-colors tracking-wide"
@@ -68,6 +59,18 @@ export function Navbar() {
             >
               À La Une
             </button>
+            {/* Sound toggle */}
+            <button
+              onClick={toggleAudio}
+              title={audioEnabled ? "Mute sounds" : "Enable sounds"}
+              className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 text-base ${
+                audioEnabled
+                  ? "text-blueboy-teal bg-blueboy-teal/10 hover:bg-blueboy-teal/20"
+                  : "text-cream/30 hover:text-cream/60"
+              }`}
+            >
+              {audioEnabled ? "♪" : "♩"}
+            </button>
             <a
               href="https://le-blueboy-artisan-glacier.wheree.com/menu"
               target="_blank"
@@ -78,7 +81,6 @@ export function Navbar() {
             </a>
           </div>
 
-          {/* Mobile hamburger */}
           <button
             className="md:hidden flex flex-col gap-1.5 p-2"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -91,7 +93,6 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
       {menuOpen && (
         <div className="fixed inset-0 z-[199] bg-blueboy-dark/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
           {["Menu", "À La Une"].map((label) => (
@@ -104,6 +105,12 @@ export function Navbar() {
               {label}
             </button>
           ))}
+          <button
+            onClick={toggleAudio}
+            className={`text-2xl ${audioEnabled ? "text-blueboy-teal" : "text-cream/40"}`}
+          >
+            {audioEnabled ? "♪ Son activé" : "♩ Son désactivé"}
+          </button>
           <a
             href="https://le-blueboy-artisan-glacier.wheree.com/menu"
             target="_blank"

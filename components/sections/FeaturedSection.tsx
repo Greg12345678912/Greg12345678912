@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { menuItems } from "@/lib/menuData";
 import { useStore } from "@/store/useStore";
 import { ItemModal } from "@/components/ui/ItemModal";
+import { useSound } from "@/lib/useSound";
 
 const ItemScene = dynamic(
   () => import("@/components/three/ItemScene").then((m) => m.ItemScene),
@@ -21,6 +22,7 @@ export function FeaturedSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const { selectedItem, setSelectedItem } = useStore();
+  const { playHover, playSelect } = useSound();
   const featured = menuItems.filter((m) => FEATURED_IDS.includes(m.id));
 
   useEffect(() => {
@@ -92,7 +94,8 @@ export function FeaturedSection() {
               {featured.map((item, i) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveIndex(i)}
+                  onMouseEnter={playHover}
+                  onClick={() => { playSelect(); setActiveIndex(i); }}
                   className={`w-full text-left p-5 rounded-2xl transition-all duration-300 border ${
                     i === activeIndex
                       ? "border-opacity-40 bg-cream/5"

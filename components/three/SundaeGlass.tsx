@@ -1,15 +1,63 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { MenuItem } from "@/store/useStore";
+import { easeOutBack, easeOutCubic, localProgress } from "@/lib/easing";
 
 interface SundaeGlassProps {
   item: MenuItem;
   scale?: number;
   position?: [number, number, number];
   rotating?: boolean;
+  assemblyId?: string;
+  isMobile?: boolean;
+}
+
+/** Displaced sphere for organic scoop */
+function makeScoopGeo(radius: number, seed: number, segs: number) {
+  const geo = new THREE.SphereGeometry(radius, segs, segs);
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i); const y = pos.getY(i); const z = pos.getZ(i);
+    const len = Math.sqrt(x * x + y * y + z * z);
+    const n =
+      Math.sin(x * 9.1 + seed) * Math.cos(y * 7.3) * Math.sin(z * 8.7) * 0.038 +
+      Math.sin(x * 4.3 + seed * 1.2) * Math.cos(z * 5.5) * 0.022;
+    const f = 1 + n / len;
+    pos.setXYZ(i, x * f, y * f, z * f);
+  }
+  geo.computeVertexNormals();
+  return geo;
+}
+
+/** Whipped cream swirl */
+function makeWhipGeometry(turns: number, segs: number): THREE.TubeGeometry {
+  const pts: THREE.Vector3[] = [];
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs;
+    const angle = t * turns * Math.PI * 2;
+    const r = Math.max(0.01, 0.22 * (1 - t * 0.78));
+    pts.push(new THREE.Vector3(Math.cos(angle) * r, t * 0.9, Math.sin(angle) * r));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  return new THREE.TubeGeometry(curve, segs, 0.075, 7, false);
+}
+
+/** Sauce drizzle path over a scoop */
+function makeSauceDrizzle(offsetAngle: number, startR: number): THREE.TubeGeometry {
+  const pts: THREE.Vector3[] = [];
+  const loops = 1.8;
+  for (let i = 0; i <= 30; i++) {
+    const t = i / 30;
+    const angle = offsetAngle + t * loops * Math.PI * 2;
+    const r = startR * (1 - t * 0.15);
+    const y = t * -0.35; // drizzle runs downward
+    pts.push(new THREE.Vector3(Math.cos(angle) * r, y, Math.sin(angle) * r));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  return new THREE.TubeGeometry(curve, 30, 0.028, 6, false);
 }
 
 export function SundaeGlass({
@@ -17,142 +65,323 @@ export function SundaeGlass({
   scale = 1,
   position = [0, 0, 0],
   rotating = true,
+  assemblyId = "default",
+  isMobile = false,
 }: SundaeGlassProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const sauceRef = useRef<THREE.Mesh>(null);
 
-  const glassMaterial = useMemo(
+  // Ingredient refs
+  const glassRef = useRef<THREE.Group>(null);
+  const fillRef = useRef<THREE.Mesh>(null);
+  const scoop1Ref = useRef<THREE.Mesh>(null);
+  const scoop2Ref = useRef<THREE.Mesh>(null);
+  const sauceRef = useRef<THREE.Group>(null);
+  const toppingsRef = useRef<THREE.Group>(null);
+  const whipRef = useRef<THREE.Mesh>(null);
+  const cherryRef = useRef<THREE.Group>(null);
+  const waferRef = useRef<THREE.Mesh>(null);
+
+  const assemblyStart = useRef<number | null>(null);
+  const prevAssemblyId = useRef(assemblyId);
+
+  useEffect(() => {
+    if (prevAssemblyId.current !== assemblyId) {
+      prevAssemblyId.current = assemblyId;
+      assemblyStart.current = null;
+    }
+  }, [assemblyId]);
+
+  const segs = isMobile ? 20 : 32;
+
+  // --- Geometries ---
+  const cylinderGeo = useMemo(() => {
+    // Slightly flared sundae glass shape
+    const pts: THREE.Vector2[] = [];
+    for (let i = 0; i <= 8; i++) {
+      const t = i / 8;
+      // Slightly tulip shape — narrower at mid, wider at top
+      const r = 0.35 + t * 0.18 + Math.sin(t * Math.PI) * 0.04;
+      pts.push(new THREE.Vector2(r, t * 1.6 - 0.8));
+    }
+    return new THREE.LatheGeometry(pts, isMobile ? 20 : 28, 0, Math.PI * 2);
+  }, [isMobile]);
+
+  const scoop1Geo = useMemo(() => makeScoopGeo(0.5, 2.33, segs), [segs]);
+  const scoop2Geo = useMemo(() => makeScoopGeo(0.38, 5.77, segs), [segs]);
+  const whipGeo = useMemo(() => makeWhipGeometry(isMobile ? 2.5 : 3.5, isMobile ? 50 : 70), [isMobile]);
+  const sauce1Geo = useMemo(() => makeSauceDrizzle(0, 0.42), []);
+  const sauce2Geo = useMemo(() => makeSauceDrizzle(Math.PI * 0.7, 0.38), []);
+
+  // --- Materials ---
+  const glassMat = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
         color: "#ffffff",
         transparent: true,
-        opacity: 0.15,
+        opacity: 0.12,
         roughness: 0,
         metalness: 0,
-        transmission: 0.9,
-        thickness: 0.5,
-        ior: 1.5,
+        transmission: 0.92,
+        thickness: 0.6,
+        ior: 1.52,
+        envMapIntensity: 2.0,
+        side: THREE.DoubleSide,
       }),
     []
   );
 
-  const iceCreamMaterial = useMemo(
+  const iceMat = useMemo(
     () =>
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhysicalMaterial({
         color: item.color,
-        roughness: 0.25,
-        metalness: 0.05,
+        roughness: 0.36,
+        metalness: 0,
+        clearcoat: 0.35,
+        clearcoatRoughness: 0.55,
+        sheen: 0.2,
+        sheenColor: new THREE.Color(item.color).lerp(new THREE.Color("#ffffff"), 0.6),
       }),
     [item.color]
   );
 
-  const sauceMaterial = useMemo(
+  const ice2Mat = useMemo(
     () =>
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhysicalMaterial({
         color: item.accentColor,
-        roughness: 0.1,
-        metalness: 0.1,
+        roughness: 0.36,
+        metalness: 0,
+        clearcoat: 0.35,
+        clearcoatRoughness: 0.55,
+        sheen: 0.2,
+        sheenColor: new THREE.Color(item.accentColor).lerp(new THREE.Color("#ffffff"), 0.6),
       }),
     [item.accentColor]
   );
 
+  const sauceMat = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: item.color,
+        roughness: 0.03,
+        metalness: 0,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.03,
+        reflectivity: 1,
+        transparent: true,
+        opacity: 0.92,
+      }),
+    [item.color]
+  );
+
+  const sauce2Mat = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: item.accentColor,
+        roughness: 0.03,
+        metalness: 0,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.03,
+        transparent: true,
+        opacity: 0.9,
+      }),
+    [item.accentColor]
+  );
+
+  const whipMat = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: "#FFFBF5",
+        roughness: 0.5,
+        metalness: 0,
+        clearcoat: 0.3,
+        clearcoatRoughness: 0.6,
+      }),
+    []
+  );
+
+  const cherryMat = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: "#CC1122",
+        roughness: 0.1,
+        metalness: 0,
+        clearcoat: 0.95,
+        clearcoatRoughness: 0.06,
+        reflectivity: 0.95,
+        sheen: 0.25,
+        sheenColor: new THREE.Color("#FF3355"),
+      }),
+    []
+  );
+
+  const toppingColors = useMemo(
+    () => [item.color, item.accentColor, "#F4C430", "#00C9B1", "#FF8C42", "#FF6B9D"],
+    [item.color, item.accentColor]
+  );
+
+  const toppingPositions = useMemo(() => {
+    const n = isMobile ? 6 : 10;
+    return Array.from({ length: n }, (_, i) => {
+      const angle = (i / n) * Math.PI * 2;
+      const r = 0.18 + (i % 3) * 0.11;
+      return {
+        x: Math.cos(angle) * r,
+        y: 0.92 + (i % 3) * 0.07,
+        z: Math.sin(angle) * r,
+        color: toppingColors[i % toppingColors.length],
+      };
+    });
+  }, [isMobile, toppingColors]);
+
+  const DURATION = 2.6;
+
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
     const t = clock.getElapsedTime();
-    if (rotating) groupRef.current.rotation.y = t * 0.35;
+
+    if (assemblyStart.current === null) assemblyStart.current = t;
+    const elapsed = t - assemblyStart.current;
+    const p = Math.min(1, elapsed / DURATION);
+
     groupRef.current.position.y = position[1] + Math.sin(t * 0.7) * 0.06;
+    if (rotating) groupRef.current.rotation.y = t * 0.32;
+
+    // Glass appears
+    if (glassRef.current) {
+      const lp = easeOutBack(localProgress(p, 0, 0.2));
+      glassRef.current.scale.setScalar(lp);
+    }
+
+    // Ice cream fill rises up from inside
+    if (fillRef.current) {
+      const lp = easeOutCubic(localProgress(p, 0.15, 0.42));
+      fillRef.current.scale.y = lp;
+      fillRef.current.position.y = -0.1 - (1 - lp) * 0.5;
+    }
+
+    // Scoop 1
+    if (scoop1Ref.current) {
+      const lp = easeOutBack(localProgress(p, 0.35, 0.58));
+      scoop1Ref.current.scale.setScalar(lp);
+      scoop1Ref.current.position.y = 0.85 - (1 - easeOutCubic(localProgress(p, 0.35, 0.58))) * 0.4;
+    }
+
+    // Scoop 2
+    if (scoop2Ref.current) {
+      const lp = easeOutBack(localProgress(p, 0.5, 0.7));
+      scoop2Ref.current.scale.setScalar(lp);
+      scoop2Ref.current.position.y = 1.08 - (1 - easeOutCubic(localProgress(p, 0.5, 0.7))) * 0.35;
+    }
+
+    // Sauce drizzle
     if (sauceRef.current) {
-      sauceRef.current.rotation.y = t * 0.8;
+      const lp = easeOutCubic(localProgress(p, 0.62, 0.78));
+      sauceRef.current.scale.setScalar(lp);
+    }
+
+    // Toppings
+    if (toppingsRef.current) {
+      const lp = easeOutBack(localProgress(p, 0.72, 0.88));
+      toppingsRef.current.scale.setScalar(lp);
+    }
+
+    // Whipped cream rises
+    if (whipRef.current) {
+      const lp = easeOutCubic(localProgress(p, 0.8, 0.95));
+      whipRef.current.scale.y = lp;
+      whipRef.current.scale.x = easeOutBack(lp);
+      whipRef.current.scale.z = easeOutBack(lp);
+    }
+
+    // Wafer slides in
+    if (waferRef.current) {
+      const lp = easeOutBack(localProgress(p, 0.78, 0.92));
+      waferRef.current.scale.setScalar(lp);
+      waferRef.current.position.x = 0.55 - (1 - easeOutCubic(localProgress(p, 0.78, 0.92))) * 0.3;
+    }
+
+    // Cherry drops
+    if (cherryRef.current) {
+      const lp = easeOutBack(localProgress(p, 0.9, 1.0));
+      cherryRef.current.scale.setScalar(lp);
+      cherryRef.current.position.y = 1.78 - (1 - easeOutCubic(localProgress(p, 0.9, 1.0))) * 0.55;
     }
   });
 
   return (
     <group ref={groupRef} scale={scale} position={position}>
       {/* Glass vessel */}
-      <mesh position={[0, 0, 0]} geometry={new THREE.CylinderGeometry(0.5, 0.35, 1.4, 24, 1, true)}>
-        <primitive object={glassMaterial} attach="material" />
-      </mesh>
-      {/* Glass bottom */}
-      <mesh position={[0, -0.7, 0]}>
-        <cylinderGeometry args={[0.35, 0.35, 0.04, 24]} />
-        <meshPhysicalMaterial color="#ffffff" transparent opacity={0.2} roughness={0} />
-      </mesh>
+      <group ref={glassRef} scale={0}>
+        <mesh geometry={cylinderGeo} material={glassMat} />
+        {/* Glass rim */}
+        <mesh position={[0, 0.82, 0]}>
+          <torusGeometry args={[0.53, 0.022, 8, isMobile ? 20 : 28]} />
+          <meshPhysicalMaterial color="#ffffff" transparent opacity={0.25} roughness={0} />
+        </mesh>
+        {/* Glass base disc */}
+        <mesh position={[0, -0.82, 0]}>
+          <cylinderGeometry args={[0.36, 0.36, 0.04, isMobile ? 16 : 24]} />
+          <meshPhysicalMaterial color="#ffffff" transparent opacity={0.2} roughness={0} />
+        </mesh>
+        {/* Stem */}
+        <mesh position={[0, -0.95, 0]}>
+          <cylinderGeometry args={[0.06, 0.1, 0.3, 8]} />
+          <meshPhysicalMaterial color="#ffffff" transparent opacity={0.25} roughness={0} />
+        </mesh>
+      </group>
 
       {/* Ice cream fill */}
-      <mesh position={[0, 0.1, 0]}>
-        <cylinderGeometry args={[0.44, 0.3, 1.2, 24]} />
-        <primitive object={iceCreamMaterial} attach="material" />
+      <mesh ref={fillRef} position={[0, -0.1, 0]} scale={[0.42, 0, 0.42]}>
+        <cylinderGeometry args={[1, 0.82, 1.6, isMobile ? 16 : 24]} />
+        <primitive object={iceMat} attach="material" />
       </mesh>
 
-      {/* Scoop on top */}
-      <mesh position={[0, 0.85, 0]}>
-        <sphereGeometry args={[0.52, 32, 32]} />
-        <primitive object={iceCreamMaterial} attach="material" />
-      </mesh>
+      {/* Scoop 1 */}
+      <mesh ref={scoop1Ref} geometry={scoop1Geo} material={iceMat} position={[0, 0.85, 0]} scale={0} castShadow />
 
-      {/* Second smaller scoop */}
-      <mesh position={[0.25, 1.1, 0.1]}>
-        <sphereGeometry args={[0.38, 32, 32]} />
-        <meshStandardMaterial color={item.accentColor} roughness={0.25} metalness={0.05} />
-      </mesh>
+      {/* Scoop 2 */}
+      <mesh ref={scoop2Ref} geometry={scoop2Geo} material={ice2Mat} position={[0.25, 1.08, 0.1]} scale={0} castShadow />
 
-      {/* Sauce drizzle */}
-      <mesh ref={sauceRef} position={[0, 0.85, 0]}>
-        <torusGeometry args={[0.45, 0.04, 8, 24]} />
-        <primitive object={sauceMaterial} attach="material" />
-      </mesh>
+      {/* Sauce drizzle group */}
+      <group ref={sauceRef} position={[0, 1.0, 0]} scale={0}>
+        <mesh geometry={sauce1Geo} material={sauceMat} />
+        <mesh geometry={sauce2Geo} material={sauce2Mat} />
+      </group>
+
+      {/* Toppings */}
+      <group ref={toppingsRef} scale={0}>
+        {toppingPositions.map((tp, i) => (
+          <mesh key={i} position={[tp.x, tp.y, tp.z]}>
+            <sphereGeometry args={[0.042, 7, 7]} />
+            <meshPhysicalMaterial
+              color={tp.color}
+              roughness={0.2}
+              clearcoat={0.5}
+              clearcoatRoughness={0.3}
+            />
+          </mesh>
+        ))}
+      </group>
 
       {/* Whipped cream */}
-      {[...Array(5)].map((_, i) => {
-        const angle = (i / 5) * Math.PI * 2;
-        return (
-          <mesh
-            key={i}
-            position={[
-              Math.cos(angle) * 0.3,
-              1.4,
-              Math.sin(angle) * 0.3,
-            ]}
-          >
-            <sphereGeometry args={[0.14, 12, 12]} />
-            <meshStandardMaterial color="#FFF8F0" roughness={0.4} />
-          </mesh>
-        );
-      })}
+      <mesh ref={whipRef} geometry={whipGeo} material={whipMat} position={[0, 1.32, 0]} scale={[0, 0, 0]} castShadow />
 
-      {/* Central whipped cream */}
-      <mesh position={[0, 1.55, 0]}>
-        <coneGeometry args={[0.2, 0.4, 12]} />
-        <meshStandardMaterial color="#FFF8F0" roughness={0.4} />
+      {/* Wafer stick */}
+      <mesh ref={waferRef} position={[0.55, 1.22, 0]} rotation={[0, 0, -0.45]} scale={0} castShadow>
+        <boxGeometry args={[0.06, 0.85, 0.28]} />
+        <meshStandardMaterial color="#D4A574" roughness={0.72} />
       </mesh>
 
-      {/* Cherry */}
-      <mesh position={[0, 1.8, 0]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshStandardMaterial color="#CC0000" roughness={0.2} metalness={0.3} />
-      </mesh>
-
-      {/* Wafer/cookie */}
-      <mesh position={[0.5, 1.2, 0]} rotation={[0, 0, -0.5]}>
-        <boxGeometry args={[0.05, 0.8, 0.3]} />
-        <meshStandardMaterial color="#D4A574" roughness={0.7} />
-      </mesh>
-
-      {/* Toppings scattered */}
-      {[...Array(8)].map((_, i) => {
-        const angle = (i / 8) * Math.PI * 2;
-        const r = 0.2 + Math.random() * 0.25;
-        const colors = [item.color, item.accentColor, "#F4C430", "#00C9B1"];
-        return (
-          <mesh
-            key={i}
-            position={[Math.cos(angle) * r, 0.9 + Math.random() * 0.4, Math.sin(angle) * r]}
-          >
-            <sphereGeometry args={[0.04, 8, 8]} />
-            <meshStandardMaterial color={colors[i % colors.length]} roughness={0.3} />
-          </mesh>
-        );
-      })}
+      {/* Cherry + stem */}
+      <group ref={cherryRef} scale={0}>
+        <mesh position={[0, 1.78, 0]} material={cherryMat} castShadow>
+          <sphereGeometry args={[0.1, isMobile ? 12 : 18, isMobile ? 12 : 18]} />
+        </mesh>
+        <mesh position={[0.04, 1.9, 0]} rotation={[0, 0, 0.3]}>
+          <cylinderGeometry args={[0.012, 0.007, 0.2, 4]} />
+          <meshStandardMaterial color="#2D5016" roughness={0.8} />
+        </mesh>
+      </group>
     </group>
   );
 }

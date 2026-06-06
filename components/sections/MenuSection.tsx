@@ -7,6 +7,7 @@ import { useStore } from "@/store/useStore";
 import { menuItems, categoryMeta, getItemsByCategory } from "@/lib/menuData";
 import type { Category, MenuItem } from "@/store/useStore";
 import { ItemModal } from "@/components/ui/ItemModal";
+import { useSound } from "@/lib/useSound";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,6 +15,7 @@ const CATEGORIES: Category[] = ["sundaes", "softserve", "hardice", "drinks", "ch
 
 export function MenuSection() {
   const { activeCategory, setActiveCategory, setSelectedItem, selectedItem } = useStore();
+  const { playCategory, playSelect } = useSound();
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -73,6 +75,7 @@ export function MenuSection() {
 
   const handleCategoryChange = (cat: Category) => {
     if (cat === activeCategory || isTransitioning) return;
+    playCategory();
     setIsTransitioning(true);
     animateGridOut(() => {
       setActiveCategory(cat);
@@ -144,7 +147,7 @@ export function MenuSection() {
               <MenuCard
                 key={item.id}
                 item={item}
-                onSelect={() => setSelectedItem(item)}
+                onSelect={() => { playSelect(); setSelectedItem(item); }}
               />
             ))}
           </div>
@@ -167,6 +170,7 @@ export function MenuSection() {
 
 function MenuCard({ item, onSelect }: { item: MenuItem; onSelect: () => void }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const { playHover } = useSound();
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = cardRef.current?.getBoundingClientRect();
@@ -199,6 +203,7 @@ function MenuCard({ item, onSelect }: { item: MenuItem; onSelect: () => void }) 
     <div
       ref={cardRef}
       onClick={onSelect}
+      onMouseEnter={playHover}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className="group relative glass rounded-2xl p-6 cursor-pointer overflow-hidden transition-all duration-300 hover:border-cream/20"
