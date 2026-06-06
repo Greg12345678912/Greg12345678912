@@ -87,6 +87,12 @@ export function Navbar() {
             >
               Notre Histoire
             </button>
+            <button
+              onClick={() => scrollTo("visiter")}
+              className="text-cream/60 hover:text-cream text-sm transition-colors tracking-wide"
+            >
+              Visiter
+            </button>
             {/* Sound toggle */}
             <button
               onClick={toggleAudio}
@@ -123,7 +129,7 @@ export function Navbar() {
 
       {menuOpen && (
         <div className="fixed inset-0 z-[199] bg-blueboy-dark/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
-          {[{ label: "Menu", id: "menu" }, { label: "Notre Histoire", id: "story" }].map(({ label, id }) => (
+          {[{ label: "Menu", id: "menu" }, { label: "Notre Histoire", id: "story" }, { label: "Visiter", id: "visiter" }].map(({ label, id }) => (
             <button
               key={id}
               onClick={() => scrollTo(id)}

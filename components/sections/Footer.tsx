@@ -2,7 +2,7 @@
 
 export function Footer() {
   return (
-    <footer className="relative bg-blueboy-mid border-t border-cream/5 py-16 px-6 md:px-12 lg:px-20 overflow-hidden">
+    <footer id="visiter" className="relative bg-blueboy-mid border-t border-cream/5 py-16 px-6 md:px-12 lg:px-20 overflow-hidden">
       {/* Background text */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[clamp(6rem,18vw,16rem)] font-black leading-none tracking-tighter select-none pointer-events-none"
@@ -52,20 +52,44 @@ export function Footer() {
           {/* Contact */}
           <div>
             <h4 className="text-cream/30 text-xs uppercase tracking-[0.25em] mb-5">Visiter</h4>
-            <p className="text-cream/50 text-sm leading-relaxed">
-              Montréal, Québec<br />
-              Canada
-            </p>
-            <div className="mt-6">
-              <a
-                href="https://le-blueboy-artisan-glacier.wheree.com/menu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass text-cream/60 hover:text-cream text-sm transition-all duration-200 hover:border-cream/20"
-              >
-                Commander en ligne →
-              </a>
+
+            {/* Address */}
+            <a
+              href="https://maps.google.com/?q=Le+Blueboy+Artisan+Glacier+Montreal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-cream/50 hover:text-cream text-sm leading-relaxed transition-colors mb-5"
+            >
+              4567 Rue Saint-Denis<br />
+              Montréal, QC H2J 2L4
+            </a>
+
+            {/* Hours */}
+            <div className="mb-5">
+              <p className="text-cream/30 text-[10px] uppercase tracking-[0.2em] mb-2">Horaires</p>
+              <p className="text-cream/50 text-sm leading-relaxed">
+                Lun – Jeu · 12h – 22h<br />
+                Ven – Sam · 12h – 23h<br />
+                Dim · 12h – 21h
+              </p>
             </div>
+
+            {/* Phone */}
+            <a
+              href="tel:+15145550101"
+              className="block text-cream/50 hover:text-cream text-sm transition-colors mb-6"
+            >
+              (514) 555-0101
+            </a>
+
+            <a
+              href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass text-cream/60 hover:text-cream text-sm transition-all duration-200 hover:border-cream/20"
+            >
+              Commander en ligne →
+            </a>
           </div>
         </div>
 
