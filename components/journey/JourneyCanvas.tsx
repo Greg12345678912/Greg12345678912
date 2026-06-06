@@ -9,6 +9,7 @@ import { SCENES, getSceneItem } from "@/lib/scenes";
 import type { SceneDefinition } from "@/lib/scenes";
 import { IceCreamCone } from "@/components/three/IceCreamCone";
 import { SundaeGlass } from "@/components/three/SundaeGlass";
+import { GLBModel } from "@/components/three/GLBModel";
 import { SceneParticles } from "./SceneParticles";
 import { easeOutBack } from "@/lib/easing";
 
@@ -139,35 +140,18 @@ function JourneyModel({
 
   const item = getSceneItem(scene);
   const [ox, oy, oz] = scene.modelOffset;
+  const assemblyId = item ? `journey-${scene.id}` : "journey-opening";
+  const isCone = item ? CONE_CATS.has(item.category) : true;
 
-  if (!item) {
-    return (
-      <group ref={groupRef} position={[ox, oy, oz]}>
-        <Float speed={1.2} floatIntensity={0.6} rotationIntensity={0.2}>
-          <IceCreamCone
-            color="#FF6B9D"
-            accentColor="#9B59B6"
-            scale={1.0}
-            assemblyId="journey-opening"
-            isMobile={isMobile}
-            rotating={false}
-          />
-        </Float>
-      </group>
-    );
-  }
-
-  const isCone = CONE_CATS.has(item.category);
-
-  return (
-    <group ref={groupRef} position={[ox, oy, oz]}>
-      <Float speed={1.1} floatIntensity={0.55} rotationIntensity={0.2}>
-        {isCone ? (
+  const proceduralFallback = (
+    <Float speed={1.1} floatIntensity={0.55} rotationIntensity={0.2}>
+      {item ? (
+        isCone ? (
           <IceCreamCone
             color={item.color}
             accentColor={item.accentColor}
             scale={1.0}
-            assemblyId={`journey-${scene.id}`}
+            assemblyId={assemblyId}
             isMobile={isMobile}
             rotating={false}
           />
@@ -175,12 +159,27 @@ function JourneyModel({
           <SundaeGlass
             item={item}
             scale={1.0}
-            assemblyId={`journey-${scene.id}`}
+            assemblyId={assemblyId}
             isMobile={isMobile}
             rotating={false}
           />
-        )}
-      </Float>
+        )
+      ) : (
+        <IceCreamCone
+          color="#FF6B9D"
+          accentColor="#9B59B6"
+          scale={1.0}
+          assemblyId="journey-opening"
+          isMobile={isMobile}
+          rotating={false}
+        />
+      )}
+    </Float>
+  );
+
+  return (
+    <group ref={groupRef} position={[ox, oy, oz]}>
+      <GLBModel sceneId={scene.id} assemblyId={assemblyId} fallback={proceduralFallback} />
     </group>
   );
 }
