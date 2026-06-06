@@ -199,72 +199,82 @@ export function IceCreamCone({
 
   const scoop1Mat = useMemo(
     () =>
-      new THREE.MeshPhysicalMaterial({
-        color,
-        roughness: 0.28,
-        metalness: 0,
-        clearcoat: 0.45,
-        clearcoatRoughness: 0.45,
-        sheen: 0.3,
-        sheenColor: new THREE.Color(color).lerp(new THREE.Color("#ffffff"), 0.5),
-      }),
-    [color]
+      isMobile
+        ? new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0 })
+        : new THREE.MeshPhysicalMaterial({
+            color,
+            roughness: 0.28,
+            metalness: 0,
+            clearcoat: 0.45,
+            clearcoatRoughness: 0.45,
+            sheen: 0.3,
+            sheenColor: new THREE.Color(color).lerp(new THREE.Color("#ffffff"), 0.5),
+          }),
+    [color, isMobile]
   );
 
   const scoop2Mat = useMemo(
     () =>
-      new THREE.MeshPhysicalMaterial({
-        color: accentColor,
-        roughness: 0.28,
-        metalness: 0,
-        clearcoat: 0.45,
-        clearcoatRoughness: 0.45,
-        sheen: 0.3,
-        sheenColor: new THREE.Color(accentColor).lerp(new THREE.Color("#ffffff"), 0.5),
-      }),
-    [accentColor]
+      isMobile
+        ? new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.35, metalness: 0 })
+        : new THREE.MeshPhysicalMaterial({
+            color: accentColor,
+            roughness: 0.28,
+            metalness: 0,
+            clearcoat: 0.45,
+            clearcoatRoughness: 0.45,
+            sheen: 0.3,
+            sheenColor: new THREE.Color(accentColor).lerp(new THREE.Color("#ffffff"), 0.5),
+          }),
+    [accentColor, isMobile]
   );
 
   const scoop3Mat = useMemo(
     () =>
-      new THREE.MeshPhysicalMaterial({
-        color: "#FFF5E0",
-        roughness: 0.42,
-        metalness: 0,
-        clearcoat: 0.2,
-        clearcoatRoughness: 0.7,
-      }),
-    []
+      isMobile
+        ? new THREE.MeshStandardMaterial({ color: "#FFF5E0", roughness: 0.5, metalness: 0 })
+        : new THREE.MeshPhysicalMaterial({
+            color: "#FFF5E0",
+            roughness: 0.42,
+            metalness: 0,
+            clearcoat: 0.2,
+            clearcoatRoughness: 0.7,
+          }),
+    [isMobile]
   );
 
   const sauceMat = useMemo(
     () =>
-      new THREE.MeshPhysicalMaterial({
-        color,
-        roughness: 0.02,
-        metalness: 0,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.02,
-        reflectivity: 1,
-        transparent: true,
-        opacity: 0.88,
-      }),
-    [color]
+      isMobile
+        ? new THREE.MeshStandardMaterial({ color, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.88 })
+        : new THREE.MeshPhysicalMaterial({
+            color,
+            roughness: 0.02,
+            metalness: 0,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.02,
+            reflectivity: 1,
+            transparent: true,
+            opacity: 0.88,
+          }),
+    [color, isMobile]
   );
 
   const cherryMat = useMemo(
     () =>
-      new THREE.MeshPhysicalMaterial({
-        color: "#CC1122",
-        roughness: 0.12,
-        metalness: 0,
-        clearcoat: 0.9,
-        clearcoatRoughness: 0.08,
-        reflectivity: 0.9,
-        sheen: 0.25,
-        sheenColor: new THREE.Color("#FF3355"),
-      }),
-    []
+      isMobile
+        ? new THREE.MeshStandardMaterial({ color: "#CC1122", roughness: 0.2, metalness: 0.1 })
+        : new THREE.MeshPhysicalMaterial({
+            color: "#CC1122",
+            roughness: 0.12,
+            metalness: 0,
+            clearcoat: 0.9,
+            clearcoatRoughness: 0.08,
+            reflectivity: 0.9,
+            sheen: 0.25,
+            sheenColor: new THREE.Color("#FF3355"),
+          }),
+    [isMobile]
   );
 
   const ASSEMBLY_DURATION = 2.4;

@@ -228,13 +228,12 @@ export function SceneParticles({ colors, count, type, speed, size }: ScenePartic
       {particles.map((p, i) => (
         <mesh key={i} geometry={geometry} position={p.pos.toArray()}>
           {isCloud ? (
-            <meshPhysicalMaterial
+            <meshStandardMaterial
               color={colorObjects[p.colorIdx % colorObjects.length]}
               transparent
               opacity={0.18}
               roughness={1}
               metalness={0}
-              transmission={0.4}
               side={THREE.DoubleSide}
             />
           ) : isSteam ? (
