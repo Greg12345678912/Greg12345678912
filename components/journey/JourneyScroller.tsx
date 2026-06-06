@@ -435,6 +435,7 @@ export function JourneyScroller() {
           </div>
         ))}
 
+        <JourneyCTA visible={activeScene === SCENES.length - 1} />
 
       </div>
     </section>

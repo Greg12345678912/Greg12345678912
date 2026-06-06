@@ -155,14 +155,14 @@ export function MenuBuilderSection() {
     if (!isMobile) return;
     if (blob1Ref.current) {
       gsap.to(blob1Ref.current, {
-        background: `radial-gradient(circle, ${current.color}aa 0%, transparent 70%)`,
+        backgroundColor: current.color,
         duration: 0.8,
         ease: "power2.out",
       });
     }
     if (blob2Ref.current) {
       gsap.to(blob2Ref.current, {
-        background: `radial-gradient(circle, ${current.accentColor}88 0%, transparent 70%)`,
+        backgroundColor: current.accentColor,
         duration: 0.8,
         ease: "power2.out",
       });
@@ -231,7 +231,8 @@ export function MenuBuilderSection() {
               width: 280,
               height: 280,
               borderRadius: "50%",
-              background: `radial-gradient(circle, ${current.color}aa 0%, transparent 70%)`,
+              backgroundColor: current.color,
+              opacity: 0.67,
               top: -80,
               left: -60,
               filter: "blur(40px)",
@@ -247,7 +248,8 @@ export function MenuBuilderSection() {
               width: 240,
               height: 240,
               borderRadius: "50%",
-              background: `radial-gradient(circle, ${current.accentColor}88 0%, transparent 70%)`,
+              backgroundColor: current.accentColor,
+              opacity: 0.53,
               bottom: -60,
               right: -40,
               filter: "blur(40px)",
