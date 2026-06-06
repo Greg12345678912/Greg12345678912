@@ -18,8 +18,11 @@ interface ItemModalProps {
 export function ItemModal({ item, onClose }: ItemModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    previousFocus.current = document.activeElement as HTMLElement;
+
     const tl = gsap.timeline();
     tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 })
       .fromTo(
@@ -29,15 +32,40 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
         "-=0.1"
       );
 
+    // Focus the close button after animation
+    const focusTimer = setTimeout(() => {
+      panelRef.current?.querySelector<HTMLElement>("button")?.focus();
+    }, 400);
+
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
+      if (e.key === "Escape") { handleClose(); return; }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     };
+
     window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    return () => {
+      clearTimeout(focusTimer);
+      window.removeEventListener("keydown", handleKey);
+    };
   }, []);
 
   const handleClose = () => {
-    const tl = gsap.timeline({ onComplete: onClose });
+    const tl = gsap.timeline({
+      onComplete: () => {
+        onClose();
+        previousFocus.current?.focus();
+      },
+    });
     tl.to(panelRef.current, { y: 40, opacity: 0, scale: 0.96, duration: 0.3, ease: "power2.in" }).to(
       overlayRef.current,
       { opacity: 0, duration: 0.2 },
@@ -48,6 +76,9 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
   return (
     <div
       ref={overlayRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.nameFr}
       className="fixed inset-0 z-[500] flex items-center justify-center p-4 md:p-8"
       style={{ background: "rgba(10, 10, 15, 0.85)", backdropFilter: "blur(20px)" }}
       onClick={(e) => e.target === overlayRef.current && handleClose()}

@@ -202,11 +202,15 @@ function MenuCard({ item, onSelect }: { item: MenuItem; onSelect: () => void }) 
   return (
     <div
       ref={cardRef}
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(); } }}
       onMouseEnter={playHover}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="group relative glass rounded-2xl p-6 cursor-pointer overflow-hidden transition-all duration-300 hover:border-cream/20"
+      aria-label={`Voir ${item.nameFr} — ${item.price.toFixed(2)} $`}
+      className="group relative glass rounded-2xl p-6 cursor-pointer overflow-hidden transition-all duration-300 hover:border-cream/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40"
       style={{ transformStyle: "preserve-3d" }}
     >
       {/* Color accent top bar */}

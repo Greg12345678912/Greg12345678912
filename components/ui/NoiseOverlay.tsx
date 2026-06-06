@@ -34,6 +34,7 @@ export function NoiseOverlay() {
   return (
     <div
       ref={ref}
+      aria-hidden="true"
       className="fixed inset-0 z-[1000] pointer-events-none select-none"
       style={{
         opacity: 0.042,

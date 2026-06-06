@@ -47,6 +47,30 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "IceCreamShop",
+  name: "Le Blueboy Artisan Glacier",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://le-blueboy.vercel.app",
+  description: "Artisan glacier à Montréal. Sundaes, soft serve, glaces dures, churros.",
+  servesCuisine: "Ice Cream",
+  priceRange: "$$",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "4567 Rue Saint-Denis",
+    addressLocality: "Montréal",
+    addressRegion: "QC",
+    postalCode: "H2J 2L4",
+    addressCountry: "CA",
+  },
+  telephone: "+15145550101",
+  openingHoursSpecification: [
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday"], opens: "12:00", closes: "22:00" },
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Friday", "Saturday"], opens: "12:00", closes: "23:00" },
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Sunday"], opens: "12:00", closes: "21:00" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -55,6 +79,10 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning className={`${playfair.variable} ${inter.variable}`}>
       <body style={{ fontFamily: "var(--font-body), sans-serif" }}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <NoiseOverlay />
         <CustomCursor />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>

@@ -273,6 +273,7 @@ export function JourneyCanvas({
 }) {
   return (
     <Canvas
+      aria-hidden="true"
       camera={{ position: [0, 0.5, 5.5], fov: 46 }}
       dpr={isMobile ? [1, 1.5] : [1, 2]}
       gl={{
@@ -280,6 +281,7 @@ export function JourneyCanvas({
         alpha: false,
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.25,
+        failIfMajorPerformanceCaveat: false,
       }}
       shadows={!isMobile}
       style={{ width: "100%", height: "100%" }}
