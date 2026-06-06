@@ -4,10 +4,14 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { useStore } from "@/store/useStore";
 
+const BRAND_LETTERS = ["L", "e", " ", "B", "l", "u", "e", "b", "o", "y"];
+const PALETTE = ["#FF6B9D", "#9B59B6", "#00C9B1", "#F4C430", "#FF8C42"];
+
 export function LoadingScreen() {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const lettersRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const taglineRef = useRef<HTMLParagraphElement>(null);
   const { setLoading } = useStore();
 
   useEffect(() => {
@@ -15,24 +19,40 @@ export function LoadingScreen() {
       onComplete: () => {
         gsap.to(containerRef.current, {
           opacity: 0,
-          duration: 0.6,
+          duration: 0.7,
           ease: "power2.inOut",
           onComplete: () => setLoading(false),
         });
       },
     });
 
-    tl.to(progressRef.current, {
-      scaleX: 1,
-      duration: 1.8,
-      ease: "power2.inOut",
-    }).from(
-      textRef.current,
+    // Letters cascade in
+    tl.fromTo(
+      lettersRef.current.filter(Boolean),
+      { y: 40, opacity: 0, rotateX: -20 },
       {
-        opacity: 0,
-        y: 10,
-        duration: 0.4,
+        y: 0,
+        opacity: 1,
+        rotateX: 0,
+        duration: 0.6,
+        stagger: 0.055,
+        ease: "power3.out",
       },
+      0
+    );
+
+    // Tagline fades in
+    tl.fromTo(
+      taglineRef.current,
+      { opacity: 0, y: 8 },
+      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+      0.5
+    );
+
+    // Progress bar fills
+    tl.to(
+      progressRef.current,
+      { scaleX: 1, duration: 1.4, ease: "power2.inOut" },
       0.3
     );
   }, [setLoading]);
@@ -42,23 +62,38 @@ export function LoadingScreen() {
       ref={containerRef}
       className="fixed inset-0 z-[9000] bg-blueboy-dark flex flex-col items-center justify-center"
     >
-      {/* Brand */}
+      {/* Brand name — letter by letter */}
       <div
-        ref={textRef}
-        className="text-center mb-12"
+        className="flex items-baseline mb-3"
+        style={{ fontFamily: "Playfair Display, serif", perspective: 600 }}
       >
-        <h1
-          className="text-5xl md:text-7xl font-bold text-cream mb-3"
-          style={{ fontFamily: "Playfair Display, serif" }}
-        >
-          <span className="gradient-text-pink italic">Le</span> Blueboy
-        </h1>
-        <p className="text-cream/40 text-xs uppercase tracking-[0.4em]">
-          Artisan Glacier · Montréal
-        </p>
+        {BRAND_LETTERS.map((letter, i) => (
+          <span
+            key={i}
+            ref={(el) => { lettersRef.current[i] = el; }}
+            className="inline-block text-5xl md:text-7xl font-bold text-cream opacity-0"
+            style={{
+              color: i < 2 ? undefined : undefined,
+              ...(i < 2 ? {
+                backgroundImage: "linear-gradient(135deg, #FF6B9D 0%, #FF8C42 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                fontStyle: "italic",
+              } : {}),
+            }}
+          >
+            {letter}
+          </span>
+        ))}
       </div>
 
-      {/* Progress bar */}
+      {/* Tagline */}
+      <p ref={taglineRef} className="text-cream/40 text-xs uppercase tracking-[0.4em] mb-12 opacity-0">
+        Artisan Glacier · Montréal
+      </p>
+
+      {/* Progress */}
       <div className="w-48 h-px bg-cream/10 overflow-hidden rounded-full">
         <div
           ref={progressRef}
@@ -70,13 +105,13 @@ export function LoadingScreen() {
         />
       </div>
 
-      {/* Dots */}
+      {/* Colored dots */}
       <div className="flex gap-2 mt-8">
-        {["#FF6B9D", "#9B59B6", "#00C9B1", "#F4C430"].map((color, i) => (
+        {PALETTE.map((color, i) => (
           <div
-            key={i}
+            key={color}
             className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ background: color, animationDelay: `${i * 0.2}s` }}
+            style={{ background: color, animationDelay: `${i * 0.18}s` }}
           />
         ))}
       </div>

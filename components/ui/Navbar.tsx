@@ -54,10 +54,10 @@ export function Navbar() {
               Menu
             </button>
             <button
-              onClick={() => scrollTo("featured")}
+              onClick={() => scrollTo("story")}
               className="text-cream/60 hover:text-cream text-sm transition-colors tracking-wide"
             >
-              À La Une
+              Notre Histoire
             </button>
             {/* Sound toggle */}
             <button
@@ -95,10 +95,10 @@ export function Navbar() {
 
       {menuOpen && (
         <div className="fixed inset-0 z-[199] bg-blueboy-dark/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
-          {["Menu", "À La Une"].map((label) => (
+          {[{ label: "Menu", id: "menu" }, { label: "Notre Histoire", id: "story" }].map(({ label, id }) => (
             <button
-              key={label}
-              onClick={() => scrollTo(label === "Menu" ? "menu" : "featured")}
+              key={id}
+              onClick={() => scrollTo(id)}
               className="text-cream text-4xl font-bold"
               style={{ fontFamily: "Playfair Display, serif" }}
             >

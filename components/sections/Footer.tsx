@@ -72,7 +72,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-cream/5 gap-4">
           <p className="text-cream/20 text-xs">
-            © 2024 Le Blueboy Artisan Glacier. Tous droits réservés.
+            © 2025 Le Blueboy Artisan Glacier. Tous droits réservés.
           </p>
           <div className="flex items-center gap-1">
             {["#FF6B9D", "#9B59B6", "#00C9B1", "#F4C430", "#FF8C42"].map((color) => (

@@ -65,6 +65,7 @@ export function StorySection() {
 
   return (
     <section
+      id="story"
       ref={sectionRef}
       className="relative bg-blueboy-mid py-32 px-6 md:px-12 lg:px-20 overflow-hidden"
     >
