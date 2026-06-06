@@ -47,7 +47,7 @@ export const SCENES: SceneDefinition[] = [
     itemId: null,
     eyebrow: "Artisan Glacier · Montréal",
     headline: ["L'été.", "Le froid.", "Ce moment."],
-    body: "Savourez avant que ça fonde.",
+    body: "Il fait chaud.",
     textAlign: "left",
     bgFrom: "#0D0800",
     bgTo: "#1A1200",

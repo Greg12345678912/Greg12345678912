@@ -174,6 +174,7 @@ function JourneyModel({
             assemblyId={assemblyId}
             isMobile={isMobile}
             rotating={false}
+            instantComplete
           />
         ) : (
           <SundaeGlass
@@ -182,6 +183,7 @@ function JourneyModel({
             assemblyId={assemblyId}
             isMobile={isMobile}
             rotating={false}
+            instantComplete
           />
         )
       ) : (
@@ -192,6 +194,7 @@ function JourneyModel({
           assemblyId="journey-opening"
           isMobile={isMobile}
           rotating={false}
+          instantComplete
         />
       )}
     </Float>

@@ -13,6 +13,7 @@ interface SundaeGlassProps {
   rotating?: boolean;
   assemblyId?: string;
   isMobile?: boolean;
+  instantComplete?: boolean;
 }
 
 /** Displaced sphere for organic scoop */
@@ -67,6 +68,7 @@ export function SundaeGlass({
   rotating = true,
   assemblyId = "default",
   isMobile = false,
+  instantComplete = false,
 }: SundaeGlassProps) {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -239,7 +241,8 @@ export function SundaeGlass({
     if (!groupRef.current) return;
     const t = clock.getElapsedTime();
 
-    if (assemblyStart.current === null) assemblyStart.current = t;
+    if (assemblyStart.current === null)
+      assemblyStart.current = instantComplete ? t - DURATION - 0.1 : t;
     const elapsed = t - assemblyStart.current;
     const p = Math.min(1, elapsed / DURATION);
 

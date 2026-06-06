@@ -11,8 +11,9 @@ interface IceCreamConeProps {
   scale?: number;
   position?: [number, number, number];
   rotating?: boolean;
-  assemblyId?: string; // change to replay assembly
+  assemblyId?: string;
   isMobile?: boolean;
+  instantComplete?: boolean;
 }
 
 /** Procedural canvas waffle-cone texture */
@@ -124,6 +125,7 @@ export function IceCreamCone({
   rotating = true,
   assemblyId = "default",
   isMobile = false,
+  instantComplete = false,
 }: IceCreamConeProps) {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -270,7 +272,8 @@ export function IceCreamCone({
     if (!groupRef.current) return;
     const t = clock.getElapsedTime();
 
-    if (assemblyStart.current === null) assemblyStart.current = t;
+    if (assemblyStart.current === null)
+      assemblyStart.current = instantComplete ? t - ASSEMBLY_DURATION - 0.1 : t;
     const elapsed = t - assemblyStart.current;
     const p = Math.min(1, elapsed / ASSEMBLY_DURATION);
 

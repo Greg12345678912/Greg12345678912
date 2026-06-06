@@ -371,7 +371,6 @@ export function JourneyScroller() {
   const [showCTA, setShowCTA] = useState(false);
   const { isMobile } = useDevice();
 
-  const sceneColors = SCENES.map((s) => s.accentColor);
   const activeSceneData = SCENES[activeScene] ?? SCENES[0];
   const { setSceneAccentColor } = useStore();
 
@@ -482,7 +481,6 @@ export function JourneyScroller() {
         </div>
 
         {/* Ambient */}
-        <SceneAmbient sceneIndex={activeScene} />
 
         {/* Scene flash on transition */}
         <SceneFlash color={activeSceneData.accentColor} />
@@ -498,30 +496,11 @@ export function JourneyScroller() {
             <SceneText
               scene={scene}
               isActive={i === activeScene && activeSceneId === scene.id}
-              firstDelay={i === 0 ? 2.6 : 0}
+              firstDelay={i === 0 ? 8.0 : 0}
             />
           </div>
         ))}
 
-        {/* Dots — click to jump to scene */}
-        <SceneDots
-          active={activeScene}
-          colors={sceneColors}
-          onDotClick={(i) => {
-            const container = containerRef.current;
-            if (!container) return;
-            const top = container.getBoundingClientRect().top + window.scrollY;
-            const target = top + (i / SCENES.length) * container.offsetHeight + 1;
-            window.scrollTo({ top: target, behavior: "smooth" });
-          }}
-        />
-
-        {/* Progress bar */}
-        <SceneProgress
-          active={activeScene}
-          total={SCENES.length}
-          color={activeSceneData.accentColor}
-        />
 
         {/* End-of-journey CTA */}
         <JourneyCTA visible={showCTA} />

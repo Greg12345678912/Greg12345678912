@@ -14,9 +14,37 @@ export function Navbar() {
   const { audioEnabled, toggleAudio } = useStore();
 
   useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
-    gsap.from(navRef.current, { y: -20, opacity: 0, duration: 0.8, delay: 0.5, ease: "power3.out" });
+
+    // Hidden by default — only revealed once the journey section is past
+    gsap.set(nav, { opacity: 0, pointerEvents: "none" });
+
+    const storyEl = document.getElementById("story");
+    if (storyEl) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          gsap.to(nav, {
+            opacity: entry.isIntersecting ? 1 : 0,
+            duration: 0.5,
+            ease: "power2.out",
+            onComplete: () => {
+              if (nav) nav.style.pointerEvents = entry.isIntersecting ? "auto" : "none";
+            },
+          });
+        },
+        { threshold: 0.02 }
+      );
+      observer.observe(storyEl);
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        observer.disconnect();
+      };
+    }
+
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
