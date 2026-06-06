@@ -32,9 +32,6 @@ function SceneText({ scene, isActive, firstDelay = 0 }: SceneTextProps) {
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const dividerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const sceneNumRef = useRef<HTMLDivElement>(null);
-  const sceneIdx = SCENES.findIndex((s) => s.id === scene.id);
   const isFirstActivation = useRef(true);
 
   useEffect(() => {
@@ -46,27 +43,7 @@ function SceneText({ scene, isActive, firstDelay = 0 }: SceneTextProps) {
 
     const tl = gsap.timeline({ delay });
 
-    // Scene number slides in
-    if (sceneNumRef.current) {
-      tl.fromTo(
-        sceneNumRef.current,
-        { x: isRight ? 30 : -30, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" },
-        0
-      );
-    }
-
-    // Eyebrow fades in
-    if (eyebrowRef.current) {
-      tl.fromTo(
-        eyebrowRef.current,
-        { opacity: 0, y: 12 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
-        0.1
-      );
-    }
-
-    // Words reveal upward through invisible clip (the premium agency move)
+    // Words reveal upward through invisible clip
     if (wordRefs.current.length > 0) {
       tl.fromTo(
         wordRefs.current,
@@ -103,15 +80,6 @@ function SceneText({ scene, isActive, firstDelay = 0 }: SceneTextProps) {
       );
     }
 
-    // CTA on opening
-    if (ctaRef.current) {
-      tl.fromTo(
-        ctaRef.current,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
-        0.9
-      );
-    }
   }, [isActive, isRight, firstDelay]);
 
   // Build word list across all headline lines
@@ -165,26 +133,6 @@ function SceneText({ scene, isActive, firstDelay = 0 }: SceneTextProps) {
       }`}
     >
       <div className="max-w-lg">
-        {/* Scene number */}
-        <div
-          ref={sceneNumRef}
-          className="flex items-center gap-3 mb-6 opacity-0"
-          style={{ justifyContent: isRight ? "flex-end" : "flex-start" }}
-        >
-          <span className="text-[10px] font-mono tracking-[0.35em]" style={{ color: `${scene.textColor}35` }}>
-            {String(sceneIdx + 1).padStart(2, "0")} / {String(SCENES.length).padStart(2, "0")}
-          </span>
-          <div className="flex-1 h-px max-w-[40px]" style={{ background: `${scene.accentColor}30` }} />
-          <span
-            className="text-[9px] uppercase tracking-[0.32em] font-medium"
-            style={{ color: scene.eyebrowColor }}
-          >
-            {scene.eyebrow}
-          </span>
-        </div>
-
-        {/* Eyebrow hidden (merged into number row above) */}
-        <p ref={eyebrowRef} className="hidden" />
 
         {/* Headline — word by word reveal */}
         <div
@@ -220,31 +168,6 @@ function SceneText({ scene, isActive, firstDelay = 0 }: SceneTextProps) {
           {scene.body}
         </p>
 
-        {/* Opening scroll hint */}
-        {isOpening && (
-          <div ref={ctaRef} className="mt-10 opacity-0 flex items-center gap-3">
-            <div className="flex gap-1">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-1 rounded-full animate-bounce"
-                  style={{
-                    background: scene.accentColor,
-                    height: 20,
-                    animationDelay: `${i * 0.15}s`,
-                    opacity: 0.7 - i * 0.15,
-                  }}
-                />
-              ))}
-            </div>
-            <span
-              className="text-[10px] uppercase tracking-[0.38em] font-medium"
-              style={{ color: `${scene.textColor}50` }}
-            >
-              Faites défiler
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -343,7 +343,7 @@ export function IceCreamCone({
     if (p >= 1) assemblyCompleteRef.current = true;
     if (assemblyCompleteRef.current) {
       meltTimeRef.current += delta;
-      const CYCLE = 22;
+      const CYCLE = 10;
       const raw = (meltTimeRef.current % CYCLE) / CYCLE;
       const dripScale = raw < 0.80 ? raw / 0.80 : raw < 0.90 ? 1.0 : 1 - (raw - 0.90) / 0.10;
       if (liveDripRef.current) liveDripRef.current.scale.y = dripScale;
