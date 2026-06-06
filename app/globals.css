@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --font-display: "Playfair Display", Georgia, serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  /* Variables populated by next/font via html className */
+  --font-display: var(--font-display, "Playfair Display", Georgia, serif);
+  --font-body: var(--font-body, "Inter", system-ui, sans-serif);
 }
 
 * {
