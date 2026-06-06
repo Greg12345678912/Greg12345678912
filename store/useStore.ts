@@ -21,6 +21,7 @@ interface AppState {
   isLoading: boolean;
   cursorVariant: "default" | "hover" | "click";
   audioEnabled: boolean;
+  sceneAccentColor: string;
 
   setActiveCategory: (cat: Category) => void;
   setSelectedItem: (item: MenuItem | null) => void;
@@ -28,6 +29,7 @@ interface AppState {
   setLoading: (loading: boolean) => void;
   setCursorVariant: (variant: "default" | "hover" | "click") => void;
   toggleAudio: () => void;
+  setSceneAccentColor: (color: string) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -37,6 +39,7 @@ export const useStore = create<AppState>((set) => ({
   isLoading: true,
   cursorVariant: "default",
   audioEnabled: false,
+  sceneAccentColor: "#FF6B9D",
 
   setActiveCategory: (cat) => set({ activeCategory: cat }),
   setSelectedItem: (item) => set({ selectedItem: item }),
@@ -44,4 +47,5 @@ export const useStore = create<AppState>((set) => ({
   setLoading: (loading) => set({ isLoading: loading }),
   setCursorVariant: (variant) => set({ cursorVariant: variant }),
   toggleAudio: () => set((s) => ({ audioEnabled: !s.audioEnabled })),
+  setSceneAccentColor: (color) => set({ sceneAccentColor: color }),
 }));

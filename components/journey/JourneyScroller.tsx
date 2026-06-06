@@ -6,8 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { SCENES } from "@/lib/scenes";
 import { useDevice } from "@/lib/useDevice";
-import { useStore } from "@/store/useStore";
 import { useSceneAmbient } from "@/lib/useSceneAmbient";
+import { useStore } from "@/store/useStore";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,76 +16,223 @@ const JourneyCanvas = dynamic(
   { ssr: false }
 );
 
-// ─── Scene text overlay ───────────────────────────────────────────────────────
-function SceneText({ scene }: { scene: (typeof SCENES)[0] }) {
+// ─── Cinematic word reveal ────────────────────────────────────────────────────
+interface SceneTextProps {
+  scene: (typeof SCENES)[0];
+  isActive: boolean;
+}
+
+function SceneText({ scene, isActive }: SceneTextProps) {
   const isRight = scene.textAlign === "right";
-  const isCenter = scene.textAlign === "center";
   const isOpening = scene.id === "opening";
+
+  // Refs to each word span
+  const wordRefs = useRef<HTMLSpanElement[]>([]);
+  const eyebrowRef = useRef<HTMLParagraphElement>(null);
+  const dividerRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const sceneNumRef = useRef<HTMLDivElement>(null);
+  const sceneIdx = SCENES.findIndex((s) => s.id === scene.id);
+
+  useEffect(() => {
+    if (!isActive) return;
+    wordRefs.current = wordRefs.current.filter(Boolean);
+
+    const tl = gsap.timeline();
+
+    // Scene number slides in
+    if (sceneNumRef.current) {
+      tl.fromTo(
+        sceneNumRef.current,
+        { x: isRight ? 30 : -30, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" },
+        0
+      );
+    }
+
+    // Eyebrow fades in
+    if (eyebrowRef.current) {
+      tl.fromTo(
+        eyebrowRef.current,
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+        0.1
+      );
+    }
+
+    // Words reveal upward through invisible clip (the premium agency move)
+    if (wordRefs.current.length > 0) {
+      tl.fromTo(
+        wordRefs.current,
+        { y: "105%", opacity: 0, rotateX: -12 },
+        {
+          y: "0%",
+          opacity: 1,
+          rotateX: 0,
+          duration: 0.75,
+          stagger: 0.055,
+          ease: "power4.out",
+        },
+        0.15
+      );
+    }
+
+    // Divider scales in from left/right
+    if (dividerRef.current) {
+      tl.fromTo(
+        dividerRef.current,
+        { scaleX: 0, transformOrigin: isRight ? "right" : "left" },
+        { scaleX: 1, duration: 0.6, ease: "power3.inOut" },
+        0.5
+      );
+    }
+
+    // Body text rises
+    if (bodyRef.current) {
+      tl.fromTo(
+        bodyRef.current,
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
+        0.6
+      );
+    }
+
+    // CTA on opening
+    if (ctaRef.current) {
+      tl.fromTo(
+        ctaRef.current,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+        0.9
+      );
+    }
+  }, [isActive, isRight]);
+
+  // Build word list across all headline lines
+  let globalWordIdx = 0;
+  const headlineLines = scene.headline.map((line, lineIdx) => {
+    const words = line.split(" ");
+    const spans = words.map((word, wi) => {
+      const idx = globalWordIdx++;
+      return (
+        // Outer div clips the upward slide
+        <div
+          key={`${lineIdx}-${wi}`}
+          style={{
+            display: "inline-block",
+            overflow: "hidden",
+            verticalAlign: "bottom",
+            marginRight: wi < words.length - 1 ? "0.22em" : 0,
+          }}
+        >
+          <span
+            ref={(el) => {
+              if (el) wordRefs.current[idx] = el;
+            }}
+            style={{
+              display: "inline-block",
+              color: lineIdx === 0 ? scene.accentColor : scene.textColor,
+              fontStyle:
+                lineIdx === 0 && isOpening
+                  ? "normal"
+                  : lineIdx % 2 === 1
+                  ? "italic"
+                  : "normal",
+            }}
+          >
+            {word}
+          </span>
+        </div>
+      );
+    });
+    return (
+      <div key={lineIdx} style={{ display: "block", lineHeight: 0.92 }}>
+        {spans}
+      </div>
+    );
+  });
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 z-10 pointer-events-none ${
-        isRight ? "items-end text-right" : isCenter ? "items-center text-center" : "items-start text-left"
+      className={`absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 pointer-events-none ${
+        isRight ? "items-end text-right" : "items-start text-left"
       }`}
-      style={{ maxWidth: isCenter ? "100%" : undefined }}
     >
-      {/* Left/right — content is half-width to leave room for 3D model */}
-      <div className={`${isCenter ? "max-w-2xl" : "max-w-lg"}`}>
-        {/* Eyebrow */}
-        <p
-          className="text-xs uppercase tracking-[0.38em] mb-5 font-medium"
-          style={{ color: scene.eyebrowColor }}
+      <div className="max-w-lg">
+        {/* Scene number */}
+        <div
+          ref={sceneNumRef}
+          className="flex items-center gap-3 mb-6 opacity-0"
+          style={{ justifyContent: isRight ? "flex-end" : "flex-start" }}
         >
-          {scene.eyebrow}
-        </p>
+          <span className="text-[10px] font-mono tracking-[0.35em]" style={{ color: `${scene.textColor}35` }}>
+            {String(sceneIdx + 1).padStart(2, "0")} / {String(SCENES.length).padStart(2, "0")}
+          </span>
+          <div className="flex-1 h-px max-w-[40px]" style={{ background: `${scene.accentColor}30` }} />
+          <span
+            className="text-[9px] uppercase tracking-[0.32em] font-medium"
+            style={{ color: scene.eyebrowColor }}
+          >
+            {scene.eyebrow}
+          </span>
+        </div>
 
-        {/* Headline */}
-        <div className="mb-6">
-          {scene.headline.map((line, i) => (
-            <div key={i} className="overflow-hidden">
-              <h2
-                className="block leading-[0.9] font-bold tracking-tight"
-                style={{
-                  fontFamily: "Playfair Display, serif",
-                  fontStyle: i === 0 && isOpening ? "normal" : i % 2 === 1 ? "italic" : "normal",
-                  fontSize: "clamp(3.5rem, 8vw, 7.5rem)",
-                  color: i === 0 ? scene.accentColor : scene.textColor,
-                }}
-              >
-                {line}
-              </h2>
-            </div>
-          ))}
+        {/* Eyebrow hidden (merged into number row above) */}
+        <p ref={eyebrowRef} className="hidden" />
+
+        {/* Headline — word by word reveal */}
+        <div
+          className="mb-8"
+          style={{
+            fontFamily: "Playfair Display, serif",
+            fontSize: "clamp(3.2rem, 7.5vw, 7rem)",
+            fontWeight: 700,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {headlineLines}
         </div>
 
         {/* Divider */}
         <div
-          className="mb-6 h-px w-24"
+          ref={dividerRef}
+          className="mb-6 h-px w-28"
           style={{
-            background: `linear-gradient(90deg, ${scene.accentColor}, transparent)`,
+            background: `linear-gradient(${isRight ? "270deg" : "90deg"}, ${scene.accentColor}, transparent)`,
             marginLeft: isRight ? "auto" : 0,
-            marginRight: isRight ? 0 : "auto",
           }}
         />
 
         {/* Body */}
         <p
-          className="text-sm md:text-base leading-relaxed font-light max-w-xs md:max-w-sm"
-          style={{ color: `${scene.textColor}aa` }}
+          ref={bodyRef}
+          className="text-sm md:text-base leading-[1.7] font-light opacity-0"
+          style={{ color: `${scene.textColor}88`, maxWidth: "30ch" }}
         >
           {scene.body}
         </p>
 
-        {/* Opening CTA */}
+        {/* Opening scroll hint */}
         {isOpening && (
-          <div className="mt-10 flex items-center gap-3">
-            <div
-              className="w-6 h-6 rounded-full animate-bounce"
-              style={{ background: scene.accentColor, opacity: 0.8 }}
-            />
+          <div ref={ctaRef} className="mt-10 opacity-0 flex items-center gap-3">
+            <div className="flex gap-1">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-1 rounded-full animate-bounce"
+                  style={{
+                    background: scene.accentColor,
+                    height: 20,
+                    animationDelay: `${i * 0.15}s`,
+                    opacity: 0.7 - i * 0.15,
+                  }}
+                />
+              ))}
+            </div>
             <span
-              className="text-xs uppercase tracking-[0.3em]"
-              style={{ color: `${scene.textColor}60` }}
+              className="text-[10px] uppercase tracking-[0.38em] font-medium"
+              style={{ color: `${scene.textColor}50` }}
             >
               Faites défiler
             </span>
@@ -96,38 +243,103 @@ function SceneText({ scene }: { scene: (typeof SCENES)[0] }) {
   );
 }
 
-// ─── Scene progress dots ───────────────────────────────────────────────────────
-function SceneDots({
-  active,
-  total,
-  colors,
-}: {
-  active: number;
-  total: number;
-  colors: string[];
-}) {
+// ─── Scene flash overlay ──────────────────────────────────────────────────────
+function SceneFlash({ color }: { color: string }) {
+  const flashRef = useRef<HTMLDivElement>(null);
+  const prevColor = useRef(color);
+
+  useEffect(() => {
+    if (!flashRef.current || prevColor.current === color) return;
+    prevColor.current = color;
+
+    gsap.fromTo(
+      flashRef.current,
+      { opacity: 0.22 },
+      { opacity: 0, duration: 0.55, ease: "power2.out" }
+    );
+  }, [color]);
+
   return (
-    <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3 pointer-events-none">
-      {Array.from({ length: total }, (_, i) => (
-        <div
-          key={i}
-          className="rounded-full transition-all duration-500"
-          style={{
-            width: i === active ? 8 : 5,
-            height: i === active ? 8 : 5,
-            background: i === active ? colors[active] : "rgba(255,248,240,0.2)",
-            boxShadow: i === active ? `0 0 12px ${colors[active]}` : "none",
-          }}
-        />
+    <div
+      ref={flashRef}
+      className="absolute inset-0 z-30 pointer-events-none opacity-0"
+      style={{ background: color, mixBlendMode: "screen" }}
+    />
+  );
+}
+
+// ─── Navigation dots ─────────────────────────────────────────────────────────
+function SceneDots({ active, colors }: { active: number; colors: string[] }) {
+  return (
+    <div className="absolute right-5 md:right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2.5 pointer-events-none">
+      {colors.map((color, i) => (
+        <div key={i} className="relative flex items-center justify-center">
+          <div
+            className="rounded-full transition-all duration-500"
+            style={{
+              width: i === active ? 7 : 4,
+              height: i === active ? 7 : 4,
+              background: i === active ? color : "rgba(255,248,240,0.18)",
+              boxShadow: i === active ? `0 0 14px ${color}, 0 0 28px ${color}60` : "none",
+            }}
+          />
+        </div>
       ))}
     </div>
   );
 }
 
-// ─── Scene ambient sound ───────────────────────────────────────────────────────
+// ─── Progress bar ─────────────────────────────────────────────────────────────
+function SceneProgress({ active, total, color }: { active: number; total: number; color: string }) {
+  return (
+    <div className="absolute bottom-0 left-0 right-0 z-20 h-px bg-white/5 pointer-events-none">
+      <div
+        className="h-full transition-all duration-700 ease-out"
+        style={{
+          width: `${((active + 1) / total) * 100}%`,
+          background: `linear-gradient(90deg, ${color}60, ${color})`,
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── Ambient driver ───────────────────────────────────────────────────────────
 function SceneAmbient({ sceneIndex }: { sceneIndex: number }) {
   useSceneAmbient(sceneIndex);
   return null;
+}
+
+// ─── End-of-journey CTA ───────────────────────────────────────────────────────
+function JourneyCTA({ visible }: { visible: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    gsap.to(ref.current, {
+      opacity: visible ? 1 : 0,
+      y: visible ? 0 : 20,
+      duration: 0.8,
+      ease: "power3.out",
+    });
+  }, [visible]);
+
+  return (
+    <div
+      ref={ref}
+      className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 pointer-events-auto opacity-0"
+    >
+      <button
+        onClick={() =>
+          document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })
+        }
+        className="group flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-sm border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-all duration-300 text-xs uppercase tracking-[0.28em]"
+      >
+        <span>Voir le menu complet</span>
+        <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+      </button>
+    </div>
+  );
 }
 
 // ─── Main scroller ────────────────────────────────────────────────────────────
@@ -135,52 +347,34 @@ export function JourneyScroller() {
   const containerRef = useRef<HTMLElement>(null);
   const textLayersRef = useRef<(HTMLDivElement | null)[]>([]);
   const [activeScene, setActiveScene] = useState(0);
+  const [activeSceneId, setActiveSceneId] = useState(SCENES[0].id);
+  const [showCTA, setShowCTA] = useState(false);
   const { isMobile } = useDevice();
 
   const sceneColors = SCENES.map((s) => s.accentColor);
+  const activeSceneData = SCENES[activeScene] ?? SCENES[0];
+  const { setSceneAccentColor } = useStore();
 
-  const activateScene = useCallback((index: number) => {
+  const hideLayer = (i: number, dir: "up" | "down") => {
+    const el = textLayersRef.current[i];
+    if (el) gsap.to(el, { opacity: 0, y: dir === "up" ? -40 : 40, duration: 0.35, ease: "power2.in" });
+  };
+
+  const showLayer = (i: number, dir: "up" | "down") => {
+    const el = textLayersRef.current[i];
+    if (el) {
+      gsap.set(el, { opacity: 0, y: dir === "up" ? 50 : -50 });
+      gsap.to(el, { opacity: 1, y: 0, duration: 0.1, ease: "none" });
+    }
+  };
+
+  const activateScene = useCallback((index: number, dir: "up" | "down" = "up") => {
     setActiveScene(index);
-
-    // Animate new scene text in
-    const newEl = textLayersRef.current[index];
-    if (newEl) {
-      gsap.fromTo(
-        newEl,
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }
-      );
-    }
+    setActiveSceneId(SCENES[index].id);
+    setShowCTA(index === SCENES.length - 1);
+    setSceneAccentColor(SCENES[index].accentColor);
+    showLayer(index, dir);
   }, []);
-
-  const deactivateScene = useCallback((index: number) => {
-    const el = textLayersRef.current[index];
-    if (el) {
-      gsap.to(el, { opacity: 0, y: -35, duration: 0.4, ease: "power2.in" });
-    }
-  }, []);
-
-  const deactivateSceneBack = useCallback((index: number) => {
-    const el = textLayersRef.current[index];
-    if (el) {
-      gsap.to(el, { opacity: 0, y: 35, duration: 0.4, ease: "power2.in" });
-    }
-  }, []);
-
-  const activateSceneBack = useCallback(
-    (index: number) => {
-      setActiveScene(index);
-      const el = textLayersRef.current[index];
-      if (el) {
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: -50 },
-          { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }
-        );
-      }
-    },
-    []
-  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -195,18 +389,26 @@ export function JourneyScroller() {
           trigger: container,
           start: `${startPct}% top`,
           end: `${endPct}% top`,
-          onEnter: () => activateScene(i),
-          onLeave: () => deactivateScene(i),
-          onEnterBack: () => activateSceneBack(i),
-          onLeaveBack: () => deactivateSceneBack(i),
+          onEnter: () => {
+            if (i > 0) hideLayer(i - 1, "up");
+            activateScene(i, "up");
+          },
+          onLeave: () => {
+            if (i === SCENES.length - 1) hideLayer(i, "up");
+          },
+          onEnterBack: () => {
+            if (i < SCENES.length - 1) hideLayer(i + 1, "down");
+            activateScene(i, "down");
+          },
+          onLeaveBack: () => {
+            hideLayer(i, "down");
+          },
         });
       });
     });
 
     return () => ctx.revert();
-  }, [activateScene, deactivateScene, activateSceneBack, deactivateSceneBack]);
-
-  const activeSceneData = SCENES[activeScene] ?? SCENES[0];
+  }, [activateScene]);
 
   return (
     <section
@@ -214,33 +416,28 @@ export function JourneyScroller() {
       id="journey"
       style={{ height: `${SCENES.length * 100}vh`, position: "relative" }}
     >
-      {/* Sticky viewport — holds canvas + all text layers */}
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          overflow: "hidden",
-        }}
-      >
-        {/* Background gradient (CSS, behind canvas) */}
+      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
+        {/* CSS background */}
         <div
           className="absolute inset-0 z-0 transition-all duration-1000"
           style={{
-            background: `radial-gradient(ellipse at 30% 60%, ${activeSceneData.fillLight}18, transparent 60%),
+            background: `radial-gradient(ellipse at 35% 55%, ${activeSceneData.fillLight}15, transparent 55%),
                          linear-gradient(135deg, ${activeSceneData.bgFrom} 0%, ${activeSceneData.bgTo} 100%)`,
           }}
         />
 
-        {/* R3F Canvas */}
+        {/* R3F canvas */}
         <div className="absolute inset-0 z-0">
           <JourneyCanvas activeSceneIndex={activeScene} isMobile={isMobile} />
         </div>
 
-        {/* Ambient sound driver */}
+        {/* Ambient */}
         <SceneAmbient sceneIndex={activeScene} />
 
-        {/* Scene text layers (stacked, only active one is visible) */}
+        {/* Scene flash on transition */}
+        <SceneFlash color={activeSceneData.accentColor} />
+
+        {/* Text layers — one per scene, GSAP controls visibility */}
         {SCENES.map((scene, i) => (
           <div
             key={scene.id}
@@ -248,30 +445,22 @@ export function JourneyScroller() {
             className="absolute inset-0 z-10"
             style={{ opacity: i === 0 ? 1 : 0 }}
           >
-            <SceneText scene={scene} />
+            <SceneText scene={scene} isActive={i === activeScene && activeSceneId === scene.id} />
           </div>
         ))}
 
-        {/* Navigation dots */}
-        <SceneDots
+        {/* Dots */}
+        <SceneDots active={activeScene} colors={sceneColors} />
+
+        {/* Progress bar */}
+        <SceneProgress
           active={activeScene}
           total={SCENES.length}
-          colors={sceneColors}
+          color={activeSceneData.accentColor}
         />
 
-        {/* Scene name pill — bottom center */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-          <div
-            className="px-4 py-2 rounded-full text-xs uppercase tracking-[0.25em] backdrop-blur-sm transition-all duration-500"
-            style={{
-              background: `${activeSceneData.accentColor}18`,
-              border: `1px solid ${activeSceneData.accentColor}30`,
-              color: `${activeSceneData.textColor}80`,
-            }}
-          >
-            {activeSceneData.id.replace(/-scene$/, "").replace(/-/g, " ")}
-          </div>
-        </div>
+        {/* End-of-journey CTA */}
+        <JourneyCTA visible={showCTA} />
       </div>
     </section>
   );
