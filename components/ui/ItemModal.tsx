@@ -26,21 +26,60 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  const blob1Ref = useRef<HTMLDivElement>(null);
+  const blob2Ref = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const priceRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768 || navigator.maxTouchPoints > 1);
   }, []);
 
+  // Blob + title entrance animation (mobile only)
+  useEffect(() => {
+    if (!isMobile) return;
+    const blob1 = blob1Ref.current;
+    const blob2 = blob2Ref.current;
+    const title = titleRef.current;
+    const price = priceRef.current;
+    if (!blob1 || !blob2) return;
+
+    // Idle float — blob1
+    gsap.to(blob1, {
+      x: 28, y: -18, duration: 4.2,
+      repeat: -1, yoyo: true, ease: "sine.inOut",
+    });
+    // Idle float — blob2 (offset phase)
+    gsap.to(blob2, {
+      x: -22, y: 20, duration: 3.6,
+      repeat: -1, yoyo: true, ease: "sine.inOut", delay: 0.9,
+    });
+
+    // Title slide-in
+    if (title) {
+      gsap.fromTo(title,
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.65, ease: "power3.out", delay: 0.15 }
+      );
+    }
+    if (price) {
+      gsap.fromTo(price,
+        { y: 12, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.3 }
+      );
+    }
+  }, [isMobile]);
+
   useEffect(() => {
     previousFocus.current = document.activeElement as HTMLElement;
 
     const tl = gsap.timeline();
-    tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 })
+    tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.25 })
       .fromTo(
         panelRef.current,
-        { y: 60, opacity: 0, scale: 0.96 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" },
+        { y: isMobile ? "100%" : 60, opacity: isMobile ? 1 : 0, scale: isMobile ? 1 : 0.96 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" },
         "-=0.1"
       );
 
@@ -68,7 +107,7 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
       clearTimeout(focusTimer);
       window.removeEventListener("keydown", handleKey);
     };
-  }, []);
+  }, [isMobile]);
 
   const handleClose = () => {
     const tl = gsap.timeline({
@@ -77,11 +116,13 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
         previousFocus.current?.focus();
       },
     });
-    tl.to(panelRef.current, { y: 40, opacity: 0, scale: 0.96, duration: 0.3, ease: "power2.in" }).to(
-      overlayRef.current,
-      { opacity: 0, duration: 0.2 },
-      "-=0.1"
-    );
+    if (isMobile) {
+      tl.to(panelRef.current, { y: "100%", duration: 0.35, ease: "power2.in" })
+        .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.15");
+    } else {
+      tl.to(panelRef.current, { y: 40, opacity: 0, scale: 0.96, duration: 0.3, ease: "power2.in" })
+        .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.1");
+    }
   };
 
   return (
@@ -91,7 +132,7 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
       aria-modal="true"
       aria-label={item.nameFr}
       className="fixed inset-0 z-[500] flex items-end md:items-center justify-center md:p-8"
-      style={{ background: "rgba(10, 10, 15, 0.85)", backdropFilter: "blur(20px)" }}
+      style={{ background: "rgba(10,10,15,0.88)", backdropFilter: "blur(20px)" }}
       onClick={(e) => e.target === overlayRef.current && handleClose()}
     >
       <div
@@ -101,60 +142,113 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center text-cream/50 hover:text-cream transition-colors"
-          style={{ background: "rgba(255,248,240,0.06)" }}
+          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full flex items-center justify-center text-cream/50 hover:text-cream transition-colors"
+          style={{ background: "rgba(255,248,240,0.07)" }}
+          aria-label="Fermer"
         >
           ✕
         </button>
 
         {isMobile ? (
-          /* ── Mobile layout: color hero + stacked info ── */
+          /* ── Mobile: typographic hero ── */
           <>
-            {/* Color hero panel */}
+            {/* Hero header */}
             <div
-              className="relative flex flex-col items-start justify-end px-6 pb-6 pt-10"
-              style={{
-                minHeight: 180,
-                background: `linear-gradient(145deg, ${item.color}28 0%, ${item.accentColor}18 60%, transparent 100%), linear-gradient(to bottom, #0D0D14, #13131A)`,
-              }}
+              className="relative overflow-hidden"
+              style={{ height: 240, background: "#0A0A0F" }}
             >
-              {/* Decorative glow orb */}
+              {/* Animated blob 1 */}
               <div
-                className="absolute top-0 right-8 w-40 h-40 rounded-full pointer-events-none"
+                ref={blob1Ref}
+                className="absolute pointer-events-none"
                 style={{
-                  background: `radial-gradient(circle, ${item.color}35 0%, transparent 70%)`,
-                  transform: "translateY(-30%)",
+                  width: 260, height: 260,
+                  borderRadius: "50%",
+                  background: `radial-gradient(circle, ${item.color}55 0%, transparent 70%)`,
+                  top: -60, left: -40,
+                  filter: "blur(32px)",
+                }}
+              />
+              {/* Animated blob 2 */}
+              <div
+                ref={blob2Ref}
+                className="absolute pointer-events-none"
+                style={{
+                  width: 220, height: 220,
+                  borderRadius: "50%",
+                  background: `radial-gradient(circle, ${item.accentColor}40 0%, transparent 70%)`,
+                  bottom: -50, right: -20,
+                  filter: "blur(28px)",
                 }}
               />
 
-              {/* Category */}
-              <span
-                className="text-[10px] uppercase tracking-[0.3em] mb-3 px-3 py-1 rounded-full border"
-                style={{ borderColor: `${item.color}40`, color: `${item.color}cc` }}
-              >
-                {item.category}
-              </span>
+              {/* Noise texture overlay */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  opacity: 0.035,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                  backgroundSize: "200px 200px",
+                }}
+              />
 
-              {/* Name + price inline */}
-              <h2
-                className="text-3xl font-bold text-cream leading-tight mb-1"
-                style={{ fontFamily: "Playfair Display, serif" }}
-              >
-                {item.nameFr}
-              </h2>
-              <span className="text-2xl font-bold" style={{ color: item.color }}>
-                ${item.price.toFixed(2)}
-              </span>
+              {/* Content */}
+              <div className="absolute inset-0 flex flex-col justify-end px-6 pb-5 pt-12">
+                {/* Category */}
+                <span
+                  className="text-[10px] uppercase tracking-[0.32em] mb-3 self-start px-2.5 py-1 rounded-full"
+                  style={{
+                    background: `${item.color}18`,
+                    border: `1px solid ${item.color}35`,
+                    color: `${item.color}dd`,
+                  }}
+                >
+                  {item.category}
+                </span>
+
+                {/* Giant item name */}
+                <h2
+                  ref={titleRef}
+                  style={{
+                    fontFamily: "Playfair Display, serif",
+                    fontSize: "clamp(3rem, 14vw, 5rem)",
+                    fontWeight: 700,
+                    fontStyle: "italic",
+                    lineHeight: 0.92,
+                    letterSpacing: "-0.02em",
+                    backgroundImage: `linear-gradient(135deg, ${item.color} 0%, ${item.accentColor} 100%)`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    opacity: 0,
+                  }}
+                >
+                  {item.nameFr}
+                </h2>
+
+                {/* Price */}
+                <div ref={priceRef} className="mt-2 flex items-baseline gap-3" style={{ opacity: 0 }}>
+                  <span
+                    className="text-2xl font-bold text-cream"
+                  >
+                    ${item.price.toFixed(2)}
+                  </span>
+                  <div
+                    className="h-px flex-1"
+                    style={{ background: `linear-gradient(90deg, ${item.color}50, transparent)` }}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Info */}
-            <div className="px-6 pt-5 pb-8">
+            <div className="px-6 pt-6 pb-8">
               <p className="text-cream/60 text-sm leading-relaxed mb-6">
                 {item.description}
               </p>
 
               {/* Flavor chips */}
-              <p className="text-cream/30 text-[10px] uppercase tracking-[0.2em] mb-3">
+              <p className="text-cream/30 text-[10px] uppercase tracking-[0.22em] mb-3">
                 Profil de saveur
               </p>
               <div className="flex flex-wrap gap-2 mb-8">
@@ -163,9 +257,9 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
                     key={f}
                     className="px-3 py-1.5 rounded-full text-sm font-medium"
                     style={{
-                      background: `${item.color}${i === 0 ? "28" : "14"}`,
+                      background: `${item.color}${i === 0 ? "25" : "12"}`,
                       color: item.color,
-                      border: `1px solid ${item.color}30`,
+                      border: `1px solid ${item.color}28`,
                     }}
                   >
                     {f}
@@ -179,7 +273,7 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
                   href="https://le-blueboy-artisan-glacier.wheree.com/menu"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full py-4 rounded-full text-center font-semibold text-sm uppercase tracking-[0.15em] text-blueboy-dark"
+                  className="block w-full py-4 rounded-full text-center font-semibold text-sm uppercase tracking-[0.18em] text-blueboy-dark"
                   style={{ background: item.color }}
                 >
                   Commander Maintenant
@@ -187,7 +281,7 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
                 <button
                   onClick={handleClose}
                   className="block w-full py-3.5 rounded-full text-center text-sm uppercase tracking-[0.15em] text-cream/50 hover:text-cream transition-colors"
-                  style={{ background: "rgba(255,248,240,0.05)", border: "1px solid rgba(255,248,240,0.08)" }}
+                  style={{ background: "rgba(255,248,240,0.04)", border: "1px solid rgba(255,248,240,0.08)" }}
                 >
                   Retour au Menu
                 </button>
@@ -195,9 +289,8 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
             </div>
           </>
         ) : (
-          /* ── Desktop layout: 3D canvas + info side-by-side ── */
+          /* ── Desktop: 3D canvas side-by-side ── */
           <div className="grid grid-cols-2 min-h-[500px]">
-            {/* 3D Scene */}
             <div
               className="relative"
               style={{ background: `radial-gradient(circle at 50% 50%, ${item.color}15, transparent 70%)` }}
@@ -213,7 +306,6 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
               </div>
             </div>
 
-            {/* Info panel */}
             <div className="p-10 flex flex-col justify-between">
               <div>
                 <span
