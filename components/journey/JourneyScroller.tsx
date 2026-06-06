@@ -194,6 +194,8 @@ function SceneText({ scene, isActive, firstDelay = 0 }: SceneTextProps) {
             fontSize: "clamp(3.2rem, 7.5vw, 7rem)",
             fontWeight: 700,
             letterSpacing: "-0.01em",
+            perspective: "900px",
+            perspectiveOrigin: isRight ? "right center" : "left center",
           }}
         >
           {headlineLines}
