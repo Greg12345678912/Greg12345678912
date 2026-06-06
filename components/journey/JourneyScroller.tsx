@@ -20,9 +20,10 @@ const JourneyCanvas = dynamic(
 interface SceneTextProps {
   scene: (typeof SCENES)[0];
   isActive: boolean;
+  firstDelay?: number;
 }
 
-function SceneText({ scene, isActive }: SceneTextProps) {
+function SceneText({ scene, isActive, firstDelay = 0 }: SceneTextProps) {
   const isRight = scene.textAlign === "right";
   const isOpening = scene.id === "opening";
 
@@ -34,12 +35,16 @@ function SceneText({ scene, isActive }: SceneTextProps) {
   const ctaRef = useRef<HTMLDivElement>(null);
   const sceneNumRef = useRef<HTMLDivElement>(null);
   const sceneIdx = SCENES.findIndex((s) => s.id === scene.id);
+  const isFirstActivation = useRef(true);
 
   useEffect(() => {
     if (!isActive) return;
     wordRefs.current = wordRefs.current.filter(Boolean);
 
-    const tl = gsap.timeline();
+    const delay = isFirstActivation.current ? firstDelay : 0;
+    isFirstActivation.current = false;
+
+    const tl = gsap.timeline({ delay });
 
     // Scene number slides in
     if (sceneNumRef.current) {
@@ -107,7 +112,7 @@ function SceneText({ scene, isActive }: SceneTextProps) {
         0.9
       );
     }
-  }, [isActive, isRight]);
+  }, [isActive, isRight, firstDelay]);
 
   // Build word list across all headline lines
   let globalWordIdx = 0;
@@ -453,7 +458,11 @@ export function JourneyScroller() {
             className="absolute inset-0 z-10"
             style={{ opacity: i === 0 ? 1 : 0 }}
           >
-            <SceneText scene={scene} isActive={i === activeScene && activeSceneId === scene.id} />
+            <SceneText
+              scene={scene}
+              isActive={i === activeScene && activeSceneId === scene.id}
+              firstDelay={i === 0 ? 2.6 : 0}
+            />
           </div>
         ))}
 
