@@ -291,7 +291,6 @@ export function JourneyScroller() {
   const textLayersRef = useRef<(HTMLDivElement | null)[]>([]);
   const [activeScene, setActiveScene] = useState(0);
   const [activeSceneId, setActiveSceneId] = useState(SCENES[0].id);
-  const [showCTA, setShowCTA] = useState(false);
   const { isMobile } = useDevice();
 
   const activeSceneData = SCENES[activeScene] ?? SCENES[0];
@@ -313,7 +312,6 @@ export function JourneyScroller() {
   const activateScene = useCallback((index: number, dir: "up" | "down" = "up") => {
     setActiveScene(index);
     setActiveSceneId(SCENES[index].id);
-    setShowCTA(index === SCENES.length - 1);
     setSceneAccentColor(SCENES[index].accentColor);
     showLayer(index, dir);
   }, []);
@@ -385,7 +383,7 @@ export function JourneyScroller() {
         <div
           className="absolute bottom-0 left-0 right-0 z-30 pointer-events-none"
           style={{
-            height: 120,
+            height: "30vh",
             background: "linear-gradient(to bottom, transparent, #13131A)",
           }}
         />
@@ -425,8 +423,6 @@ export function JourneyScroller() {
         ))}
 
 
-        {/* End-of-journey CTA */}
-        <JourneyCTA visible={showCTA} />
       </div>
     </section>
   );
