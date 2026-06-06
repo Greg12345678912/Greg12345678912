@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useRef, useEffect } from "react";
+import { Suspense, useRef, useEffect, Component } from "react";
+import type { ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -15,6 +16,12 @@ import { IceCreamCone } from "./IceCreamCone";
 import { useDevice } from "@/lib/useDevice";
 import type { MenuItem, Category } from "@/store/useStore";
 import * as THREE from "three";
+
+class PostFXBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? null : this.props.children; }
+}
 
 const CONE_CATS: Category[] = ["softserve", "hardice", "churros"];
 
@@ -133,22 +140,24 @@ function SceneContent({ item, isMobile }: SceneContentProps) {
       <Environment preset="studio" />
 
       {!isMobile && (
-        <EffectComposer>
-          <DepthOfField
-            focusDistance={0.005}
-            focalLength={0.055}
-            bokehScale={2.5}
-            height={480}
-          />
-          <Bloom
-            intensity={0.5}
-            luminanceThreshold={0.5}
-            luminanceSmoothing={0.9}
-            radius={0.75}
-            mipmapBlur
-          />
-          <Vignette eskil={false} offset={0.12} darkness={0.55} />
-        </EffectComposer>
+        <PostFXBoundary>
+          <EffectComposer>
+            <DepthOfField
+              focusDistance={0.005}
+              focalLength={0.055}
+              bokehScale={2.5}
+              height={480}
+            />
+            <Bloom
+              intensity={0.5}
+              luminanceThreshold={0.5}
+              luminanceSmoothing={0.9}
+              radius={0.75}
+              mipmapBlur
+            />
+            <Vignette eskil={false} offset={0.12} darkness={0.55} />
+          </EffectComposer>
+        </PostFXBoundary>
       )}
     </>
   );
@@ -170,6 +179,7 @@ export function ItemScene({ item }: ItemSceneProps) {
         alpha: true,
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.2,
+        failIfMajorPerformanceCaveat: false,
       }}
       shadows={!isMobile}
       style={{ background: "transparent" }}

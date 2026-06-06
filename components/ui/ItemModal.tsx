@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Component } from "react";
+import type { ReactNode } from "react";
 import { gsap } from "gsap";
 import dynamic from "next/dynamic";
 import type { MenuItem } from "@/store/useStore";
@@ -9,6 +10,12 @@ const ItemScene = dynamic(
   () => import("@/components/three/ItemScene").then((m) => m.ItemScene),
   { ssr: false }
 );
+
+class CanvasErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? null : this.props.children; }
+}
 
 interface ItemModalProps {
   item: MenuItem;
@@ -102,7 +109,9 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
             style={{ background: `radial-gradient(circle at 50% 50%, ${item.color}15, transparent 70%)` }}
           >
             <div className="absolute inset-0">
-              <ItemScene item={item} />
+              <CanvasErrorBoundary>
+                <ItemScene item={item} />
+              </CanvasErrorBoundary>
             </div>
 
             {/* Drag hint */}
