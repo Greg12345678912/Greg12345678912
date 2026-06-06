@@ -394,6 +394,28 @@ export function JourneyScroller() {
     showLayer(index, dir);
   }, []);
 
+  // Keyboard arrow navigation between scenes
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      const rect = container.getBoundingClientRect();
+      // Only handle when the journey section is in the viewport
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+      e.preventDefault();
+      const top = container.getBoundingClientRect().top + window.scrollY;
+      const delta = e.key === "ArrowDown" ? 1 : -1;
+      const next = Math.max(0, Math.min(SCENES.length - 1, activeScene + delta));
+      const target = top + (next / SCENES.length) * container.offsetHeight + 1;
+      window.scrollTo({ top: target, behavior: "smooth" });
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [activeScene]);
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
