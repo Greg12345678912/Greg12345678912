@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useStore } from "@/store/useStore";
 
@@ -8,6 +8,11 @@ export function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const { sceneAccentColor } = useStore();
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
 
   useEffect(() => {
     const dot = dotRef.current;
@@ -15,6 +20,12 @@ export function CustomCursor() {
     if (!dot || !ring) return;
 
     const onMove = (e: MouseEvent) => {
+      // Fade in on first move
+      if (dot.style.opacity === "0") {
+        gsap.to([dot, ring], { opacity: 1, duration: 0.3 });
+        gsap.set(dot, { x: e.clientX, y: e.clientY });
+        gsap.set(ring, { x: e.clientX, y: e.clientY });
+      }
       gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0 });
       gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.18, ease: "power2.out" });
     };
@@ -61,17 +72,19 @@ export function CustomCursor() {
     });
   }, [sceneAccentColor]);
 
+  if (isTouchDevice) return null;
+
   return (
     <>
       <div
         ref={dotRef}
-        className="fixed w-2 h-2 rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 transition-colors"
-        style={{ backgroundColor: sceneAccentColor || "#FF6B9D" }}
+        className="fixed w-2 h-2 rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2"
+        style={{ backgroundColor: sceneAccentColor || "#FF6B9D", opacity: 0 }}
       />
       <div
         ref={ringRef}
         className="fixed w-9 h-9 rounded-full pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 border"
-        style={{ borderColor: sceneAccentColor || "#FF6B9D", opacity: 0.7 }}
+        style={{ borderColor: sceneAccentColor || "#FF6B9D", opacity: 0 }}
       />
     </>
   );
