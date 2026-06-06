@@ -15,6 +15,26 @@ import { easeOutBack } from "@/lib/easing";
 
 const CONE_CATS = new Set(["softserve", "hardice", "churros"]);
 
+// ─── Camera FOV controller ───────────────────────────────────────────────────
+function CameraController({ fov }: { fov: number }) {
+  const { camera } = useThree();
+  const targetFov = useRef(fov);
+
+  useEffect(() => {
+    targetFov.current = fov;
+  }, [fov]);
+
+  useFrame(() => {
+    if (!(camera instanceof THREE.PerspectiveCamera)) return;
+    if (Math.abs(camera.fov - targetFov.current) > 0.02) {
+      camera.fov += (targetFov.current - camera.fov) * 0.04;
+      camera.updateProjectionMatrix();
+    }
+  });
+
+  return null;
+}
+
 // ─── Background + fog controller ────────────────────────────────────────────
 function FogController({ scene }: { scene: SceneDefinition }) {
   const { gl, scene: threeScene } = useThree();
@@ -196,6 +216,7 @@ function SceneContent({
 
   return (
     <>
+      <CameraController fov={scene.cameraFov} />
       <FogController scene={scene} />
       <SceneLights scene={scene} />
 
