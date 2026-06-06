@@ -11,7 +11,7 @@
   "dependencies": {
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.17.10",
-    "@react-three/postprocessing": "^3.0.4",
+    "@react-three/postprocessing": "^2.19.1",
     "@vercel/analytics": "^2.0.1",
     "gsap": "^3.12.7",
     "howler": "^2.2.4",
