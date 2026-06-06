@@ -186,6 +186,8 @@ export function ItemScene({ item }: ItemSceneProps) {
         autoRotate
         autoRotateSpeed={1.2}
         rotateSpeed={0.5}
+        enableDamping
+        dampingFactor={0.07}
       />
     </Canvas>
   );

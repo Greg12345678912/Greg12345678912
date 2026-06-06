@@ -166,28 +166,35 @@ export function StorySection() {
               Glacier
             </div>
 
-            {/* Floating color blobs */}
-            <div className="relative mt-8 h-32">
+            {/* Flavor palette chips */}
+            <div className="mt-8 flex flex-wrap gap-2">
               {[
-                { color: "#FF6B9D", x: "10%", size: 80 },
-                { color: "#9B59B6", x: "35%", size: 60 },
-                { color: "#00C9B1", x: "60%", size: 70 },
-                { color: "#F4C430", x: "80%", size: 50 },
-              ].map(({ color, x, size }, i) => (
-                <div
-                  key={i}
-                  className="absolute rounded-full animate-float"
+                { label: "Mangue", color: "#FF8C42" },
+                { label: "Taro", color: "#9B59B6" },
+                { label: "Vanille", color: "#F4C430" },
+                { label: "Espresso", color: "#C8941A" },
+                { label: "Fraise", color: "#FF6B9D" },
+                { label: "Chamoy", color: "#CC0055" },
+                { label: "Pistache", color: "#7CB342" },
+                { label: "Caramel", color: "#D4A574" },
+              ].map(({ label, color }, i) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs uppercase tracking-[0.18em] animate-float"
                   style={{
-                    background: color,
-                    width: size,
-                    height: size,
-                    left: x,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    opacity: 0.8,
-                    animationDelay: `${i * 0.8}s`,
+                    border: `1px solid ${color}35`,
+                    color: `${color}cc`,
+                    background: `${color}08`,
+                    animationDelay: `${i * 0.35}s`,
+                    animationDuration: `${5.5 + i * 0.4}s`,
                   }}
-                />
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: color, boxShadow: `0 0 6px ${color}80` }}
+                  />
+                  {label}
+                </span>
               ))}
             </div>
           </div>
