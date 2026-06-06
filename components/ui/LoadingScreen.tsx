@@ -5,8 +5,6 @@ import { gsap } from "gsap";
 import { useStore } from "@/store/useStore";
 
 const BRAND_LETTERS = ["L", "e", " ", "B", "l", "u", "e", "b", "o", "y"];
-const PALETTE = ["#FF6B9D", "#9B59B6", "#00C9B1", "#F4C430", "#FF8C42"];
-
 export function LoadingScreen() {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -99,22 +97,12 @@ export function LoadingScreen() {
           ref={progressRef}
           className="h-full rounded-full origin-left"
           style={{
-            background: "linear-gradient(90deg, #FF6B9D, #9B59B6, #00C9B1)",
+            background: "linear-gradient(90deg, #FF8C00, #FFB347)",
             transform: "scaleX(0)",
           }}
         />
       </div>
 
-      {/* Colored dots */}
-      <div className="flex gap-2 mt-8">
-        {PALETTE.map((color, i) => (
-          <div
-            key={color}
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ background: color, animationDelay: `${i * 0.18}s` }}
-          />
-        ))}
-      </div>
     </div>
   );
 }

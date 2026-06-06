@@ -16,6 +16,7 @@
 
 html {
   scroll-behavior: auto;
+  overscroll-behavior: none;
 }
 
 body {
@@ -23,6 +24,7 @@ body {
   color: #FFF8F0;
   font-family: var(--font-body);
   overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 /* Lenis smooth scroll */

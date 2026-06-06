@@ -102,7 +102,7 @@ function SceneLights({ scene }: { scene: SceneDefinition }) {
       <ambientLight intensity={0.3} />
       <directionalLight
         ref={keyRef}
-        position={[-3, 7, 5]}
+        position={[-3, 3.5, 5]}
         intensity={scene.keyIntensity}
         color={scene.keyLight}
         castShadow
@@ -123,6 +123,8 @@ function SceneLights({ scene }: { scene: SceneDefinition }) {
         color={scene.rimLight}
       />
       <pointLight position={[0, -3, 3]} intensity={0.25} color={scene.fillLight} decay={2} />
+      {/* Back-rim specular — separates scoop from background with a cool edge */}
+      <directionalLight position={[3, 1, -4]} intensity={0.45} color="#B8D4FF" />
     </>
   );
 }
@@ -188,8 +190,8 @@ function JourneyModel({
         )
       ) : (
         <IceCreamCone
-          color="#FF6B9D"
-          accentColor="#9B59B6"
+          color="#F2AABB"
+          accentColor="#C8A8D8"
           scale={1.0}
           assemblyId="journey-opening"
           isMobile={isMobile}

@@ -378,7 +378,7 @@ export function JourneyScroller() {
       id="journey"
       style={{ height: `${SCENES.length * 100}vh`, position: "relative" }}
     >
-      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
+      <div style={{ position: "sticky", top: 0, height: "100dvh", overflow: "clip" }}>
         {/* Fade to section below */}
         <div
           className="absolute bottom-0 left-0 right-0 z-30 pointer-events-none"

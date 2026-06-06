@@ -201,11 +201,11 @@ export function IceCreamCone({
     () =>
       new THREE.MeshPhysicalMaterial({
         color,
-        roughness: 0.38,
+        roughness: 0.28,
         metalness: 0,
-        clearcoat: 0.3,
-        clearcoatRoughness: 0.6,
-        sheen: 0.15,
+        clearcoat: 0.45,
+        clearcoatRoughness: 0.45,
+        sheen: 0.3,
         sheenColor: new THREE.Color(color).lerp(new THREE.Color("#ffffff"), 0.5),
       }),
     [color]
@@ -215,11 +215,11 @@ export function IceCreamCone({
     () =>
       new THREE.MeshPhysicalMaterial({
         color: accentColor,
-        roughness: 0.38,
+        roughness: 0.28,
         metalness: 0,
-        clearcoat: 0.3,
-        clearcoatRoughness: 0.6,
-        sheen: 0.15,
+        clearcoat: 0.45,
+        clearcoatRoughness: 0.45,
+        sheen: 0.3,
         sheenColor: new THREE.Color(accentColor).lerp(new THREE.Color("#ffffff"), 0.5),
       }),
     [accentColor]
@@ -246,6 +246,8 @@ export function IceCreamCone({
         clearcoat: 1.0,
         clearcoatRoughness: 0.02,
         reflectivity: 1,
+        transparent: true,
+        opacity: 0.88,
       }),
     [color]
   );
@@ -448,7 +450,7 @@ export function IceCreamCone({
 
       {/* Live melt drip — slowly elongates after assembly */}
       <mesh ref={liveDripRef} geometry={liveDripGeo} position={[0.55, 0.52, 0.32]} scale={[1, 0, 1]} castShadow>
-        <meshPhysicalMaterial color={color} roughness={0.02} metalness={0} clearcoat={1.0} clearcoatRoughness={0.02} />
+        <meshPhysicalMaterial color={color} roughness={0.02} metalness={0} clearcoat={1.0} clearcoatRoughness={0.02} transparent opacity={0.88} />
       </mesh>
       {/* Falling drop — detaches when drip is full */}
       <mesh ref={liveDropRef} position={[0.55, -0.33, 0.32]} visible={false} castShadow>
