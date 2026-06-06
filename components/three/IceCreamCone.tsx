@@ -140,11 +140,17 @@ export function IceCreamCone({
   // Assembly timing
   const assemblyStart = useRef<number | null>(null);
   const prevAssemblyId = useRef(assemblyId);
+  const meltTimeRef = useRef(0);
+  const assemblyCompleteRef = useRef(false);
+  const liveDripRef = useRef<THREE.Mesh>(null);
+  const liveDropRef = useRef<THREE.Mesh>(null);
 
   useEffect(() => {
     if (prevAssemblyId.current !== assemblyId) {
       prevAssemblyId.current = assemblyId;
       assemblyStart.current = null;
+      meltTimeRef.current = 0;
+      assemblyCompleteRef.current = false;
     }
   }, [assemblyId]);
 
@@ -172,6 +178,11 @@ export function IceCreamCone({
   const swirlGeo = useMemo(() => makeSwirlGeometry(isMobile ? 3 : 4, swirlSegs), [isMobile, swirlSegs]);
   const drip1Geo = useMemo(() => makeDripGeometry(1, 0.3), []);
   const drip2Geo = useMemo(() => makeDripGeometry(-0.7, 0.8), []);
+  const liveDripGeo = useMemo(() => {
+    const g = new THREE.CylinderGeometry(0.02, 0.044, 0.85, 6);
+    g.translate(0, -0.425, 0); // pivot at top — hangs downward
+    return g;
+  }, []);
 
   const coneMat = useMemo(
     () =>
@@ -255,7 +266,7 @@ export function IceCreamCone({
   const ASSEMBLY_DURATION = 2.4;
   const FLOAT_Y_BASE = position[1];
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, delta) => {
     if (!groupRef.current) return;
     const t = clock.getElapsedTime();
 
@@ -323,6 +334,28 @@ export function IceCreamCone({
       const lp = easeOutBack(localProgress(p, 0.88, 1.0));
       cherryRef.current.scale.setScalar(lp);
       cherryRef.current.position.y = 2.22 - (1 - easeOutCubic(localProgress(p, 0.88, 1.0))) * 0.6;
+    }
+
+    // Live melt drip — cycles continuously after assembly completes
+    if (p >= 1) assemblyCompleteRef.current = true;
+    if (assemblyCompleteRef.current) {
+      meltTimeRef.current += delta;
+      const CYCLE = 22;
+      const raw = (meltTimeRef.current % CYCLE) / CYCLE;
+      const dripScale = raw < 0.80 ? raw / 0.80 : raw < 0.90 ? 1.0 : 1 - (raw - 0.90) / 0.10;
+      if (liveDripRef.current) liveDripRef.current.scale.y = dripScale;
+      if (liveDropRef.current) {
+        if (raw > 0.80) {
+          liveDropRef.current.visible = true;
+          const dropT = (raw - 0.80) / 0.20;
+          const dripBottom = 0.52 - 0.85 * dripScale;
+          liveDropRef.current.position.set(0.55, dripBottom - dropT * 1.6, 0.32);
+          const sz = 0.044 * Math.max(0.05, 1 - dropT * 0.85);
+          liveDropRef.current.scale.set(sz * 0.75, sz * (1 + dropT * 1.2), sz * 0.75);
+        } else {
+          liveDropRef.current.visible = false;
+        }
+      }
     }
   });
 
@@ -409,6 +442,16 @@ export function IceCreamCone({
           <meshStandardMaterial color="#2D5016" roughness={0.8} />
         </mesh>
       </group>
+
+      {/* Live melt drip — slowly elongates after assembly */}
+      <mesh ref={liveDripRef} geometry={liveDripGeo} position={[0.55, 0.52, 0.32]} scale={[1, 0, 1]} castShadow>
+        <meshPhysicalMaterial color={color} roughness={0.02} metalness={0} clearcoat={1.0} clearcoatRoughness={0.02} />
+      </mesh>
+      {/* Falling drop — detaches when drip is full */}
+      <mesh ref={liveDropRef} position={[0.55, -0.33, 0.32]} visible={false} castShadow>
+        <sphereGeometry args={[1, 7, 7]} />
+        <meshPhysicalMaterial color={color} roughness={0.02} metalness={0} clearcoat={1.0} clearcoatRoughness={0.02} />
+      </mesh>
     </group>
   );
 }

@@ -78,6 +78,12 @@ function getVel(type: ParticleType, speed: number): THREE.Vector3 {
         (Math.random() - 0.5) * speed * 0.018,
         (Math.random() - 0.5) * speed * 0.012
       );
+    case "condensation":
+      return new THREE.Vector3(
+        (Math.random() - 0.5) * 0.002,
+        -(speed * 0.006 + Math.random() * 0.003),
+        (Math.random() - 0.5) * 0.001
+      );
     default:
       return new THREE.Vector3(
         (Math.random() - 0.5) * 0.004,
@@ -99,6 +105,13 @@ function respawnParticle(p: Particle, type: ParticleType, speed: number) {
       );
       break;
     case "petal":
+      p.pos.set(
+        (Math.random() - 0.5) * 14,
+        5 + Math.random() * 3,
+        (Math.random() - 0.5) * 5
+      );
+      break;
+    case "condensation":
       p.pos.set(
         (Math.random() - 0.5) * 14,
         5 + Math.random() * 3,
@@ -138,6 +151,7 @@ export function SceneParticles({ colors, count, type, speed, size }: ScenePartic
   const isCloud = type === "cloud";
   const isPetal = type === "petal";
   const isSteam = type === "steam";
+  const isCondensation = type === "condensation";
 
   // Geometry per type
   const geometry = useMemo(() => {
@@ -175,6 +189,10 @@ export function SceneParticles({ colors, count, type, speed, size }: ScenePartic
       } else if (type === "petal") {
         p.angle += p.angleVel * dt;
         p.pos.x += Math.sin(p.angle * 0.5) * 0.003 + p.vel.x;
+        p.pos.y += p.vel.y;
+        p.pos.z += p.vel.z;
+      } else if (type === "condensation") {
+        p.pos.x += Math.sin(t * 0.2 + p.phase) * 0.001 + p.vel.x;
         p.pos.y += p.vel.y;
         p.pos.z += p.vel.z;
       } else {
@@ -225,6 +243,15 @@ export function SceneParticles({ colors, count, type, speed, size }: ScenePartic
               transparent
               opacity={0.45}
               roughness={1}
+              depthWrite={false}
+            />
+          ) : isCondensation ? (
+            <meshStandardMaterial
+              color={colorObjects[p.colorIdx % colorObjects.length]}
+              transparent
+              opacity={0.38}
+              roughness={0.05}
+              metalness={0.35}
               depthWrite={false}
             />
           ) : (
