@@ -417,6 +417,14 @@ export function JourneyScroller() {
       style={{ height: `${SCENES.length * 100}vh`, position: "relative" }}
     >
       <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
+        {/* Fade to section below */}
+        <div
+          className="absolute bottom-0 left-0 right-0 z-30 pointer-events-none"
+          style={{
+            height: 120,
+            background: "linear-gradient(to bottom, transparent, #13131A)",
+          }}
+        />
         {/* CSS background */}
         <div
           className="absolute inset-0 z-0 transition-all duration-1000"

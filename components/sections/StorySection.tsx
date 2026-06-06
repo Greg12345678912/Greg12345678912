@@ -16,6 +16,7 @@ export function StorySection() {
   const sectionRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+  const glacierRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -56,6 +57,18 @@ export function StorySection() {
           trigger: sectionRef.current,
           start: "top 60%",
           once: true,
+        },
+      });
+
+      // "Glacier" text parallax — scrolls at 0.45x speed
+      gsap.to(glacierRef.current, {
+        y: -80,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
         },
       });
     });
@@ -140,8 +153,9 @@ export function StorySection() {
               ))}
             </div>
 
-            {/* Big decorative text */}
+            {/* Big decorative text — parallaxed */}
             <div
+              ref={glacierRef}
               className="text-[clamp(5rem,12vw,10rem)] font-black leading-none tracking-tighter select-none pointer-events-none"
               style={{
                 fontFamily: "Playfair Display, serif",
