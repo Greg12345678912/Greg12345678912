@@ -274,11 +274,24 @@ function SceneFlash({ color }: { color: string }) {
 }
 
 // ─── Navigation dots ─────────────────────────────────────────────────────────
-function SceneDots({ active, colors }: { active: number; colors: string[] }) {
+function SceneDots({
+  active,
+  colors,
+  onDotClick,
+}: {
+  active: number;
+  colors: string[];
+  onDotClick: (i: number) => void;
+}) {
   return (
-    <div className="absolute right-5 md:right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2.5 pointer-events-none">
+    <div className="absolute right-5 md:right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2.5 pointer-events-auto">
       {colors.map((color, i) => (
-        <div key={i} className="relative flex items-center justify-center">
+        <button
+          key={i}
+          onClick={() => onDotClick(i)}
+          aria-label={`Scene ${i + 1}`}
+          className="relative flex items-center justify-center p-2 -m-2"
+        >
           <div
             className="rounded-full transition-all duration-500"
             style={{
@@ -288,7 +301,7 @@ function SceneDots({ active, colors }: { active: number; colors: string[] }) {
               boxShadow: i === active ? `0 0 14px ${color}, 0 0 28px ${color}60` : "none",
             }}
           />
-        </div>
+        </button>
       ))}
     </div>
   );
@@ -466,8 +479,18 @@ export function JourneyScroller() {
           </div>
         ))}
 
-        {/* Dots */}
-        <SceneDots active={activeScene} colors={sceneColors} />
+        {/* Dots — click to jump to scene */}
+        <SceneDots
+          active={activeScene}
+          colors={sceneColors}
+          onDotClick={(i) => {
+            const container = containerRef.current;
+            if (!container) return;
+            const top = container.getBoundingClientRect().top + window.scrollY;
+            const target = top + (i / SCENES.length) * container.offsetHeight + 1;
+            window.scrollTo({ top: target, behavior: "smooth" });
+          }}
+        />
 
         {/* Progress bar */}
         <SceneProgress
