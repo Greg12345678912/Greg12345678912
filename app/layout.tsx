@@ -21,6 +21,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://le-blueboy.vercel.app"
+  ),
   title: "Le Blueboy — Artisan Glacier · Montréal",
   description:
     "Une expérience glacée comme jamais vue. Sundaes artisanaux, soft serve signature, churros et plus — Le Blueboy Artisan Glacier à Montréal.",

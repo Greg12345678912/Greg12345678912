@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="8" fill="#0A0A0F"/>
+  <!-- Stylised ice cream scoop -->
+  <circle cx="16" cy="13" r="7" fill="url(#g)"/>
+  <!-- Cone -->
+  <polygon points="10,19 22,19 16,30" fill="#C8864A" opacity="0.9"/>
+  <line x1="13" y1="21" x2="16" y2="28.5" stroke="#A86030" stroke-width="0.8" opacity="0.6"/>
+  <line x1="16" y1="19.5" x2="19" y2="28.5" stroke="#A86030" stroke-width="0.8" opacity="0.6"/>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B9D"/>
+      <stop offset="100%" stop-color="#9B59B6"/>
+    </linearGradient>
+  </defs>
+</svg>
