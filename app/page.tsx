@@ -6,7 +6,7 @@ import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { Navbar } from "@/components/ui/Navbar";
 import { JourneyScroller } from "@/components/journey/JourneyScroller";
 import { StorySection } from "@/components/sections/StorySection";
-import { MenuSection } from "@/components/sections/MenuSection";
+import { MenuBuilderSection } from "@/components/sections/MenuBuilderSection";
 import { Footer } from "@/components/sections/Footer";
 
 export default function Home() {
@@ -25,7 +25,7 @@ export default function Home() {
         <main>
           <JourneyScroller />
           <StorySection />
-          <MenuSection />
+          <MenuBuilderSection />
         </main>
         <Footer />
       </div>
