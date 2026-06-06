@@ -117,19 +117,28 @@ export function SundaeGlass({
   // --- Materials ---
   const glassMat = useMemo(
     () =>
-      new THREE.MeshPhysicalMaterial({
-        color: "#ffffff",
-        transparent: true,
-        opacity: 0.12,
-        roughness: 0,
-        metalness: 0,
-        transmission: 0.92,
-        thickness: 0.6,
-        ior: 1.52,
-        envMapIntensity: 2.0,
-        side: THREE.DoubleSide,
-      }),
-    []
+      isMobile
+        ? new THREE.MeshStandardMaterial({
+            color: "#ffffff",
+            transparent: true,
+            opacity: 0.15,
+            roughness: 0.05,
+            metalness: 0.1,
+            side: THREE.DoubleSide,
+          })
+        : new THREE.MeshPhysicalMaterial({
+            color: "#ffffff",
+            transparent: true,
+            opacity: 0.12,
+            roughness: 0,
+            metalness: 0,
+            transmission: 0.92,
+            thickness: 0.6,
+            ior: 1.52,
+            envMapIntensity: 2.0,
+            side: THREE.DoubleSide,
+          }),
+    [isMobile]
   );
 
   const iceMat = useMemo(

@@ -33,7 +33,7 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768 || navigator.maxTouchPoints > 1);
+    setIsMobile(window.innerWidth < 768);
   }, []);
 
   // Blob + title entrance animation (mobile only)

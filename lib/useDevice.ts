@@ -7,7 +7,7 @@ export function useDevice() {
 
   useEffect(() => {
     const check = () => {
-      setIsMobile(window.innerWidth < 768 || navigator.maxTouchPoints > 1);
+      setIsMobile(window.innerWidth < 768);
     };
     check();
     window.addEventListener("resize", check, { passive: true });
