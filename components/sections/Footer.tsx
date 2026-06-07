@@ -1,5 +1,7 @@
 "use client";
 
+import { ORDER_URL } from "@/lib/constants";
+
 export function Footer() {
   return (
     <footer id="visiter" className="relative bg-blueboy-mid border-t border-cream/5 py-16 px-6 md:px-12 lg:px-20 overflow-hidden">
@@ -37,7 +39,7 @@ export function Footer() {
               {["Sundaes", "Soft Serve", "Glaces Dures", "Boissons", "Churros", "Spéciaux"].map((item) => (
                 <li key={item}>
                   <a
-                    href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+                    href={ORDER_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cream/50 hover:text-cream text-sm transition-colors"
@@ -83,7 +85,7 @@ export function Footer() {
             </a>
 
             <a
-              href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+              href={ORDER_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass text-cream/60 hover:text-cream text-sm transition-all duration-200 hover:border-cream/20"

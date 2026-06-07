@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useStore } from "@/store/useStore";
+import { ORDER_URL } from "@/lib/constants";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,7 +11,6 @@ export function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { audioEnabled, toggleAudio } = useStore();
 
   useEffect(() => {
     const nav = navRef.current;
@@ -93,20 +92,8 @@ export function Navbar() {
             >
               Visiter
             </button>
-            {/* Sound toggle */}
-            <button
-              onClick={toggleAudio}
-              title={audioEnabled ? "Mute sounds" : "Enable sounds"}
-              className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 text-base ${
-                audioEnabled
-                  ? "text-blueboy-teal bg-blueboy-teal/10 hover:bg-blueboy-teal/20"
-                  : "text-cream/30 hover:text-cream/60"
-              }`}
-            >
-              {audioEnabled ? "♪" : "♩"}
-            </button>
-            <a
-              href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+            <
+              href={ORDER_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-full bg-cream text-blueboy-dark text-sm font-semibold hover:scale-105 transition-transform"
@@ -139,14 +126,8 @@ export function Navbar() {
               {label}
             </button>
           ))}
-          <button
-            onClick={toggleAudio}
-            className={`text-2xl ${audioEnabled ? "text-blueboy-teal" : "text-cream/40"}`}
-          >
-            {audioEnabled ? "♪ Son activé" : "♩ Son désactivé"}
-          </button>
-          <a
-            href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+          <
+            href={ORDER_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="px-8 py-4 rounded-full bg-cream text-blueboy-dark text-lg font-semibold"

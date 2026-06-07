@@ -7,7 +7,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { SCENES } from "@/lib/scenes";
 import { useDevice } from "@/lib/useDevice";
-import { useSceneAmbient } from "@/lib/useSceneAmbient";
 import { useStore } from "@/store/useStore";
 
 class CanvasErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -258,12 +257,6 @@ function SceneProgress({ active, total, color }: { active: number; total: number
   );
 }
 
-// ─── Ambient driver ───────────────────────────────────────────────────────────
-function SceneAmbient({ sceneIndex }: { sceneIndex: number }) {
-  useSceneAmbient(sceneIndex);
-  return null;
-}
-
 // ─── End-of-journey CTA ───────────────────────────────────────────────────────
 function JourneyCTA({ visible }: { visible: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -413,8 +406,6 @@ export function JourneyScroller() {
             <JourneyCanvas activeSceneIndex={activeScene} isMobile={isMobile} />
           </CanvasErrorBoundary>
         </div>
-
-        {/* Ambient */}
 
         {/* Scene flash on transition */}
         <SceneFlash color={activeSceneData.accentColor} />

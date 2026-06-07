@@ -23,7 +23,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://project-oiyOe.vercel.app"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
   ),
   title: "Le Blueboy — Artisan Glacier · Montréal",
   description:
@@ -52,7 +52,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "IceCreamShop",
   name: "Le Blueboy Artisan Glacier",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://project-oiyOe.vercel.app",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   description: "Artisan glacier à Montréal. Sundaes, soft serve, glaces dures, churros.",
   servesCuisine: "Ice Cream",
   priceRange: "$$",

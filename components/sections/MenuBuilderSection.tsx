@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { gsap } from "gsap";
+import { ORDER_URL } from "@/lib/constants";
 import { BUILDER_FLAVORS, BUILDER_BASES } from "@/lib/builderData";
 import type { BaseId } from "@/lib/builderData";
 import type { MenuItem } from "@/store/useStore";
@@ -351,7 +352,7 @@ export function MenuBuilderSection() {
 
           {/* CTA */}
           <a
-            href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+            href={ORDER_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full py-4 rounded-full text-center font-semibold text-sm uppercase tracking-[0.18em] text-blueboy-dark"
@@ -512,7 +513,7 @@ export function MenuBuilderSection() {
 
         {/* CTA */}
         <a
-          href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+          href={ORDER_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="block py-4 rounded-full text-center font-semibold text-sm uppercase tracking-[0.18em] text-blueboy-dark transition-transform hover:scale-[1.02] active:scale-[0.98]"

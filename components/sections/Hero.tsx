@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ORDER_URL } from "@/lib/constants";
 import dynamic from "next/dynamic";
 
 const HeroScene = dynamic(
@@ -141,7 +142,7 @@ export function Hero() {
             </button>
 
             <a
-              href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+              href={ORDER_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cream/50 text-sm hover:text-cream transition-colors duration-200 underline underline-offset-4"

@@ -48,7 +48,13 @@ html.lenis {
   pointer-events: none;
 }
 
-/* Custom cursor */
+/* Custom cursor — hide native cursor on fine-pointer (mouse) devices only */
+@media (pointer: fine) {
+  body {
+    cursor: none;
+  }
+}
+
 .cursor {
   pointer-events: none;
   position: fixed;

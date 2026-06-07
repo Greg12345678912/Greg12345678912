@@ -3,6 +3,7 @@
 import { useEffect, useRef, Component, useState } from "react";
 import type { ReactNode } from "react";
 import { gsap } from "gsap";
+import { ORDER_URL } from "@/lib/constants";
 import dynamic from "next/dynamic";
 import type { MenuItem } from "@/store/useStore";
 
@@ -270,7 +271,7 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
               {/* CTAs */}
               <div className="space-y-3">
                 <a
-                  href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+                  href={ORDER_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full py-4 rounded-full text-center font-semibold text-sm uppercase tracking-[0.18em] text-blueboy-dark"
@@ -351,7 +352,7 @@ export function ItemModal({ item, onClose }: ItemModalProps) {
               </div>
               <div className="space-y-3">
                 <a
-                  href="https://le-blueboy-artisan-glacier.wheree.com/menu"
+                  href={ORDER_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full py-4 rounded-full text-center font-semibold text-sm uppercase tracking-[0.15em] text-blueboy-dark transition-all duration-300 hover:scale-[1.02]"
