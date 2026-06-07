@@ -430,7 +430,7 @@ export function JourneyScroller() {
             <SceneText
               scene={scene}
               isActive={i === activeScene && activeSceneId === scene.id}
-              firstDelay={i === 0 ? 8.0 : 0}
+              firstDelay={i === 0 ? 1.2 : 0}
             />
           </div>
         ))}
