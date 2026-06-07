@@ -134,7 +134,7 @@ export function IceCreamCone({
   const scoop1Ref = useRef<THREE.Mesh>(null);
   const scoop2Ref = useRef<THREE.Mesh>(null);
   const scoop3Ref = useRef<THREE.Mesh>(null);
-  const swirlRef = useRef<THREE.Mesh>(null);
+  const swirlRef = useRef<THREE.Group>(null);
   const dripsRef = useRef<THREE.Group>(null);
   const sprinklesRef = useRef<THREE.Group>(null);
   const cherryRef = useRef<THREE.Group>(null);
@@ -209,6 +209,8 @@ export function IceCreamCone({
             clearcoatRoughness: 0.45,
             sheen: 0.3,
             sheenColor: new THREE.Color(color).lerp(new THREE.Color("#ffffff"), 0.5),
+            transmission: 0.08,
+            thickness: 0.45,
           }),
     [color, isMobile]
   );
@@ -225,6 +227,8 @@ export function IceCreamCone({
             clearcoatRoughness: 0.45,
             sheen: 0.3,
             sheenColor: new THREE.Color(accentColor).lerp(new THREE.Color("#ffffff"), 0.5),
+            transmission: 0.08,
+            thickness: 0.45,
           }),
     [accentColor, isMobile]
   );
@@ -239,6 +243,8 @@ export function IceCreamCone({
             metalness: 0,
             clearcoat: 0.2,
             clearcoatRoughness: 0.7,
+            transmission: 0.06,
+            thickness: 0.4,
           }),
     [isMobile]
   );
@@ -249,10 +255,10 @@ export function IceCreamCone({
         ? new THREE.MeshStandardMaterial({ color, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.88 })
         : new THREE.MeshPhysicalMaterial({
             color,
-            roughness: 0.02,
+            roughness: 0.3,
             metalness: 0,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.02,
+            clearcoat: 0.65,
+            clearcoatRoughness: 0.10,
             reflectivity: 1,
             transparent: true,
             opacity: 0.88,
@@ -404,15 +410,28 @@ export function IceCreamCone({
       <mesh ref={scoop3Ref} geometry={scoop3Geo} material={scoop3Mat} position={[-0.05, 1.75, 0]} scale={0} castShadow />
 
       {/* Soft serve swirl */}
-      <mesh ref={swirlRef} geometry={swirlGeo} position={[-0.05, 1.75, 0]} scale={[0, 0, 0]} castShadow>
-        <meshPhysicalMaterial
-          color="#FFF5E0"
-          roughness={0.32}
-          metalness={0}
-          clearcoat={0.4}
-          clearcoatRoughness={0.5}
-        />
-      </mesh>
+      <group ref={swirlRef} position={[-0.05, 1.75, 0]} scale={[0, 0, 0]}>
+        <mesh geometry={swirlGeo} castShadow>
+          <meshPhysicalMaterial
+            color="#FFF5E0"
+            roughness={0.32}
+            metalness={0}
+            clearcoat={0.4}
+            clearcoatRoughness={0.5}
+          />
+        </mesh>
+        {/* Taper peak — cone at swirl apex */}
+        <mesh position={[0.075, 1.63, 0]}>
+          <coneGeometry args={[0.06, 0.16, 6]} />
+          <meshPhysicalMaterial
+            color="#FFF5E0"
+            roughness={0.32}
+            metalness={0}
+            clearcoat={0.4}
+            clearcoatRoughness={0.5}
+          />
+        </mesh>
+      </group>
 
       {/* Drips */}
       <group ref={dripsRef} scale={0}>
@@ -420,20 +439,20 @@ export function IceCreamCone({
         <mesh geometry={drip2Geo}>
           <meshPhysicalMaterial
             color={accentColor}
-            roughness={0.02}
+            roughness={0.28}
             metalness={0}
-            clearcoat={1.0}
-            clearcoatRoughness={0.02}
+            clearcoat={0.65}
+            clearcoatRoughness={0.10}
           />
         </mesh>
         {/* Drip bulb pools */}
         <mesh position={[0.62, -0.32, 0.58]}>
           <sphereGeometry args={[0.055, 8, 8]} />
-          <meshPhysicalMaterial color={color} roughness={0.02} clearcoat={1} clearcoatRoughness={0.02} />
+          <meshPhysicalMaterial color={color} roughness={0.28} clearcoat={0.65} clearcoatRoughness={0.10} />
         </mesh>
         <mesh position={[-0.60, -0.3, 0.68]}>
           <sphereGeometry args={[0.045, 8, 8]} />
-          <meshPhysicalMaterial color={accentColor} roughness={0.02} clearcoat={1} clearcoatRoughness={0.02} />
+          <meshPhysicalMaterial color={accentColor} roughness={0.28} clearcoat={0.65} clearcoatRoughness={0.10} />
         </mesh>
       </group>
 
@@ -460,12 +479,12 @@ export function IceCreamCone({
 
       {/* Live melt drip — slowly elongates after assembly */}
       <mesh ref={liveDripRef} geometry={liveDripGeo} position={[0.55, 0.52, 0.32]} scale={[1, 0, 1]} castShadow>
-        <meshPhysicalMaterial color={color} roughness={0.02} metalness={0} clearcoat={1.0} clearcoatRoughness={0.02} transparent opacity={0.88} />
+        <meshPhysicalMaterial color={color} roughness={0.28} metalness={0} clearcoat={0.65} clearcoatRoughness={0.10} transparent opacity={0.88} />
       </mesh>
       {/* Falling drop — detaches when drip is full */}
       <mesh ref={liveDropRef} position={[0.55, -0.33, 0.32]} visible={false} castShadow>
         <sphereGeometry args={[1, 7, 7]} />
-        <meshPhysicalMaterial color={color} roughness={0.02} metalness={0} clearcoat={1.0} clearcoatRoughness={0.02} />
+        <meshPhysicalMaterial color={color} roughness={0.28} metalness={0} clearcoat={0.65} clearcoatRoughness={0.10} />
       </mesh>
     </group>
   );

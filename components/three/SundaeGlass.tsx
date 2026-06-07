@@ -79,7 +79,7 @@ export function SundaeGlass({
   const scoop2Ref = useRef<THREE.Mesh>(null);
   const sauceRef = useRef<THREE.Group>(null);
   const toppingsRef = useRef<THREE.Group>(null);
-  const whipRef = useRef<THREE.Mesh>(null);
+  const whipRef = useRef<THREE.Group>(null);
   const cherryRef = useRef<THREE.Group>(null);
   const waferRef = useRef<THREE.Mesh>(null);
 
@@ -143,40 +143,56 @@ export function SundaeGlass({
 
   const iceMat = useMemo(
     () =>
-      new THREE.MeshPhysicalMaterial({
-        color: item.color,
-        roughness: 0.36,
-        metalness: 0,
-        clearcoat: 0.35,
-        clearcoatRoughness: 0.55,
-        sheen: 0.2,
-        sheenColor: new THREE.Color(item.color).lerp(new THREE.Color("#ffffff"), 0.6),
-      }),
-    [item.color]
+      isMobile
+        ? new THREE.MeshStandardMaterial({
+            color: item.color,
+            roughness: 0.36,
+            metalness: 0,
+          })
+        : new THREE.MeshPhysicalMaterial({
+            color: item.color,
+            roughness: 0.36,
+            metalness: 0,
+            clearcoat: 0.35,
+            clearcoatRoughness: 0.55,
+            sheen: 0.2,
+            sheenColor: new THREE.Color(item.color).lerp(new THREE.Color("#ffffff"), 0.6),
+            transmission: 0.08,
+            thickness: 0.45,
+          }),
+    [item.color, isMobile]
   );
 
   const ice2Mat = useMemo(
     () =>
-      new THREE.MeshPhysicalMaterial({
-        color: item.accentColor,
-        roughness: 0.36,
-        metalness: 0,
-        clearcoat: 0.35,
-        clearcoatRoughness: 0.55,
-        sheen: 0.2,
-        sheenColor: new THREE.Color(item.accentColor).lerp(new THREE.Color("#ffffff"), 0.6),
-      }),
-    [item.accentColor]
+      isMobile
+        ? new THREE.MeshStandardMaterial({
+            color: item.accentColor,
+            roughness: 0.36,
+            metalness: 0,
+          })
+        : new THREE.MeshPhysicalMaterial({
+            color: item.accentColor,
+            roughness: 0.36,
+            metalness: 0,
+            clearcoat: 0.35,
+            clearcoatRoughness: 0.55,
+            sheen: 0.2,
+            sheenColor: new THREE.Color(item.accentColor).lerp(new THREE.Color("#ffffff"), 0.6),
+            transmission: 0.08,
+            thickness: 0.45,
+          }),
+    [item.accentColor, isMobile]
   );
 
   const sauceMat = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
         color: item.color,
-        roughness: 0.03,
+        roughness: 0.28,
         metalness: 0,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.03,
+        clearcoat: 0.65,
+        clearcoatRoughness: 0.10,
         reflectivity: 1,
         transparent: true,
         opacity: 0.92,
@@ -188,10 +204,10 @@ export function SundaeGlass({
     () =>
       new THREE.MeshPhysicalMaterial({
         color: item.accentColor,
-        roughness: 0.03,
+        roughness: 0.28,
         metalness: 0,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.03,
+        clearcoat: 0.65,
+        clearcoatRoughness: 0.10,
         transparent: true,
         opacity: 0.9,
       }),
@@ -367,16 +383,29 @@ export function SundaeGlass({
             <sphereGeometry args={[0.042, 7, 7]} />
             <meshPhysicalMaterial
               color={tp.color}
-              roughness={0.2}
-              clearcoat={0.5}
-              clearcoatRoughness={0.3}
+              roughness={0.25}
+              clearcoat={0.55}
+              clearcoatRoughness={0.12}
             />
           </mesh>
         ))}
       </group>
 
       {/* Whipped cream */}
-      <mesh ref={whipRef} geometry={whipGeo} material={whipMat} position={[0, 1.32, 0]} scale={[0, 0, 0]} castShadow />
+      <group ref={whipRef} position={[0, 1.32, 0]} scale={[0, 0, 0]}>
+        <mesh geometry={whipGeo} material={whipMat} castShadow />
+        {/* Taper peak — cone at whip apex */}
+        <mesh position={[-0.048, 0.97, 0]}>
+          <coneGeometry args={[0.055, 0.14, 6]} />
+          <meshPhysicalMaterial
+            color="#FFFBF5"
+            roughness={0.5}
+            metalness={0}
+            clearcoat={0.3}
+            clearcoatRoughness={0.6}
+          />
+        </mesh>
+      </group>
 
       {/* Wafer stick */}
       <mesh ref={waferRef} position={[0.55, 1.22, 0]} rotation={[0, 0, -0.45]} scale={0} castShadow>

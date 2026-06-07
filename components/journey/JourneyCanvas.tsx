@@ -249,10 +249,9 @@ function SceneContent({
         blur={3}
         far={5}
         color="#000000"
-        frames={1}
       />
 
-      <Environment preset="night" />
+      <Environment preset="studio" />
 
       {!isMobile && (
         <PostFXBoundary>
