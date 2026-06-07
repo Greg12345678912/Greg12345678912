@@ -92,7 +92,7 @@ export function Navbar() {
             >
               Visiter
             </button>
-            <
+            <a
               href={ORDER_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -126,7 +126,7 @@ export function Navbar() {
               {label}
             </button>
           ))}
-          <
+          <a
             href={ORDER_URL}
             target="_blank"
             rel="noopener noreferrer"
