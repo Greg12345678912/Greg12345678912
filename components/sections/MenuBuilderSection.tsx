@@ -1,12 +1,20 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Component } from "react";
+import type { ReactNode } from "react";
 import { gsap } from "gsap";
 import { ORDER_URL } from "@/lib/constants";
 import { BUILDER_FLAVORS, BUILDER_BASES } from "@/lib/builderData";
 import type { BaseId } from "@/lib/builderData";
 import type { MenuItem } from "@/store/useStore";
+
+class CanvasErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(err: Error) { console.error("[BuilderCanvas] render error:", err.message); }
+  render() { return this.state.failed ? null : this.props.children; }
+}
 
 // Dynamic import — no SSR for WebGL canvas
 const BuilderCanvas = dynamic(
@@ -374,11 +382,13 @@ export function MenuBuilderSection() {
     >
       {/* ── Left: 3D canvas ── */}
       <div className="relative" style={{ width: "58%", height: "100%" }}>
-        <BuilderCanvas
-          flavorItem={current}
-          baseId={currentBase.id as BaseId}
-          isMobile={false}
-        />
+        <CanvasErrorBoundary>
+          <BuilderCanvas
+            flavorItem={current}
+            baseId={currentBase.id as BaseId}
+            isMobile={false}
+          />
+        </CanvasErrorBoundary>
 
         {/* Scoop swipe zone — top 58% */}
         <div
