@@ -13,6 +13,7 @@ interface SundaeGlassProps {
   rotating?: boolean;
   assemblyId?: string;
   isMobile?: boolean;
+  enableTransmission?: boolean;
   instantComplete?: boolean;
 }
 
@@ -68,8 +69,10 @@ export function SundaeGlass({
   rotating = true,
   assemblyId = "default",
   isMobile = false,
+  enableTransmission,
   instantComplete = false,
 }: SundaeGlassProps) {
+  const useTransmission = enableTransmission ?? !isMobile;
   const groupRef = useRef<THREE.Group>(null);
 
   // Ingredient refs
@@ -126,19 +129,30 @@ export function SundaeGlass({
             metalness: 0.1,
             side: THREE.DoubleSide,
           })
-        : new THREE.MeshPhysicalMaterial({
-            color: "#ffffff",
-            transparent: true,
-            opacity: 0.12,
-            roughness: 0,
-            metalness: 0,
-            transmission: 0.92,
-            thickness: 0.6,
-            ior: 1.52,
-            envMapIntensity: 2.0,
-            side: THREE.DoubleSide,
-          }),
-    [isMobile]
+        : useTransmission
+          ? new THREE.MeshPhysicalMaterial({
+              color: "#ffffff",
+              transparent: true,
+              opacity: 0.12,
+              roughness: 0,
+              metalness: 0,
+              transmission: 0.92,
+              thickness: 0.6,
+              ior: 1.52,
+              envMapIntensity: 2.0,
+              side: THREE.DoubleSide,
+            })
+          : new THREE.MeshPhysicalMaterial({
+              color: "#ffffff",
+              transparent: true,
+              opacity: 0.28,
+              roughness: 0,
+              metalness: 0,
+              ior: 1.52,
+              envMapIntensity: 2.0,
+              side: THREE.DoubleSide,
+            }),
+    [isMobile, useTransmission]
   );
 
   const iceMat = useMemo(
@@ -149,18 +163,28 @@ export function SundaeGlass({
             roughness: 0.36,
             metalness: 0,
           })
-        : new THREE.MeshPhysicalMaterial({
-            color: item.color,
-            roughness: 0.36,
-            metalness: 0,
-            clearcoat: 0.35,
-            clearcoatRoughness: 0.55,
-            sheen: 0.2,
-            sheenColor: new THREE.Color(item.color).lerp(new THREE.Color("#ffffff"), 0.6),
-            transmission: 0.08,
-            thickness: 0.45,
-          }),
-    [item.color, isMobile]
+        : useTransmission
+          ? new THREE.MeshPhysicalMaterial({
+              color: item.color,
+              roughness: 0.36,
+              metalness: 0,
+              clearcoat: 0.35,
+              clearcoatRoughness: 0.55,
+              sheen: 0.2,
+              sheenColor: new THREE.Color(item.color).lerp(new THREE.Color("#ffffff"), 0.6),
+              transmission: 0.08,
+              thickness: 0.45,
+            })
+          : new THREE.MeshPhysicalMaterial({
+              color: item.color,
+              roughness: 0.36,
+              metalness: 0,
+              clearcoat: 0.35,
+              clearcoatRoughness: 0.55,
+              sheen: 0.2,
+              sheenColor: new THREE.Color(item.color).lerp(new THREE.Color("#ffffff"), 0.6),
+            }),
+    [item.color, isMobile, useTransmission]
   );
 
   const ice2Mat = useMemo(
@@ -171,18 +195,28 @@ export function SundaeGlass({
             roughness: 0.36,
             metalness: 0,
           })
-        : new THREE.MeshPhysicalMaterial({
-            color: item.accentColor,
-            roughness: 0.36,
-            metalness: 0,
-            clearcoat: 0.35,
-            clearcoatRoughness: 0.55,
-            sheen: 0.2,
-            sheenColor: new THREE.Color(item.accentColor).lerp(new THREE.Color("#ffffff"), 0.6),
-            transmission: 0.08,
-            thickness: 0.45,
-          }),
-    [item.accentColor, isMobile]
+        : useTransmission
+          ? new THREE.MeshPhysicalMaterial({
+              color: item.accentColor,
+              roughness: 0.36,
+              metalness: 0,
+              clearcoat: 0.35,
+              clearcoatRoughness: 0.55,
+              sheen: 0.2,
+              sheenColor: new THREE.Color(item.accentColor).lerp(new THREE.Color("#ffffff"), 0.6),
+              transmission: 0.08,
+              thickness: 0.45,
+            })
+          : new THREE.MeshPhysicalMaterial({
+              color: item.accentColor,
+              roughness: 0.36,
+              metalness: 0,
+              clearcoat: 0.35,
+              clearcoatRoughness: 0.55,
+              sheen: 0.2,
+              sheenColor: new THREE.Color(item.accentColor).lerp(new THREE.Color("#ffffff"), 0.6),
+            }),
+    [item.accentColor, isMobile, useTransmission]
   );
 
   const sauceMat = useMemo(

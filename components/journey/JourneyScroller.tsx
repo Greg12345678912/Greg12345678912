@@ -6,7 +6,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { SCENES } from "@/lib/scenes";
-import { useDevice } from "@/lib/useDevice";
 import { useStore } from "@/store/useStore";
 
 class CanvasErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -295,8 +294,6 @@ export function JourneyScroller() {
   const textLayersRef = useRef<(HTMLDivElement | null)[]>([]);
   const [activeScene, setActiveScene] = useState(0);
   const [activeSceneId, setActiveSceneId] = useState(SCENES[0].id);
-  const { isMobile } = useDevice();
-
   const activeSceneData = SCENES[activeScene] ?? SCENES[0];
   const { setSceneAccentColor } = useStore();
 
@@ -403,7 +400,7 @@ export function JourneyScroller() {
         {/* R3F canvas */}
         <div className="absolute inset-0 z-0">
           <CanvasErrorBoundary>
-            <JourneyCanvas activeSceneIndex={activeScene} isMobile={isMobile} />
+            <JourneyCanvas activeSceneIndex={activeScene} />
           </CanvasErrorBoundary>
         </div>
 

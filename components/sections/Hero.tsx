@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Component } from "react";
+import type { ReactNode } from "react";
 import { gsap } from "gsap";
 import { ORDER_URL } from "@/lib/constants";
 import dynamic from "next/dynamic";
+
+class HeroSceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? null : this.props.children; }
+}
 
 const HeroScene = dynamic(
   () => import("@/components/three/HeroScene").then((m) => m.HeroScene),
@@ -85,7 +92,9 @@ export function Hero() {
 
       {/* 3D Canvas — full height right side */}
       <div className="absolute inset-0 z-0">
-        <HeroScene />
+        <HeroSceneBoundary>
+          <HeroScene />
+        </HeroSceneBoundary>
       </div>
 
       {/* Text content — left side overlay */}

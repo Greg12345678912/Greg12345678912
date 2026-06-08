@@ -19,6 +19,7 @@ import { SundaeGlass } from "@/components/three/SundaeGlass";
 import { GLBModel } from "@/components/three/GLBModel";
 import { SceneParticles } from "./SceneParticles";
 import { easeOutBack } from "@/lib/easing";
+import { useDevice } from "@/lib/useDevice";
 
 const CONE_CATS = new Set(["softserve", "hardice", "churros"]);
 
@@ -130,7 +131,6 @@ function SceneLights({ scene }: { scene: SceneDefinition }) {
         color={scene.rimLight}
       />
       <pointLight position={[0, -3, 3]} intensity={0.25} color={scene.fillLight} decay={2} />
-      {/* Back-rim specular — separates scoop from background with a cool edge */}
       <directionalLight position={[3, 1, -4]} intensity={0.45} color="#B8D4FF" />
     </>
   );
@@ -140,15 +140,16 @@ function SceneLights({ scene }: { scene: SceneDefinition }) {
 function JourneyModel({
   scene,
   isMobile,
+  enableTransmission,
 }: {
   scene: SceneDefinition;
   isMobile: boolean;
+  enableTransmission: boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const animProgress = useRef(0);
   const prevId = useRef(scene.id);
 
-  // On scene change: snap scale to 0, then animate in
   useEffect(() => {
     if (prevId.current !== scene.id) {
       prevId.current = scene.id;
@@ -163,7 +164,6 @@ function JourneyModel({
       animProgress.current = Math.min(1, animProgress.current + delta * 1.4);
       groupRef.current.scale.setScalar(easeOutBack(animProgress.current) * scene.modelScale);
     }
-    // Subtle idle rotation
     groupRef.current.rotation.y += delta * 0.25;
   });
 
@@ -182,6 +182,7 @@ function JourneyModel({
             scale={1.0}
             assemblyId={assemblyId}
             isMobile={isMobile}
+            enableTransmission={enableTransmission}
             rotating={false}
             instantComplete
           />
@@ -191,6 +192,7 @@ function JourneyModel({
             scale={1.0}
             assemblyId={assemblyId}
             isMobile={isMobile}
+            enableTransmission={enableTransmission}
             rotating={false}
             instantComplete
           />
@@ -202,6 +204,7 @@ function JourneyModel({
           scale={1.0}
           assemblyId="journey-opening"
           isMobile={isMobile}
+          enableTransmission={enableTransmission}
           rotating={false}
           instantComplete
         />
@@ -220,9 +223,15 @@ function JourneyModel({
 function SceneContent({
   activeSceneIndex,
   isMobile,
+  enableTransmission,
+  postProcessing,
+  particleDensity,
 }: {
   activeSceneIndex: number;
   isMobile: boolean;
+  enableTransmission: boolean;
+  postProcessing: boolean;
+  particleDensity: number;
 }) {
   const scene = SCENES[activeSceneIndex] ?? SCENES[0];
 
@@ -234,13 +243,17 @@ function SceneContent({
 
       <SceneParticles
         colors={scene.particleColors}
-        count={isMobile ? Math.floor(scene.particleCount * 0.5) : scene.particleCount}
+        count={Math.floor(scene.particleCount * particleDensity)}
         type={scene.particleType}
         speed={scene.particleSpeed}
         size={scene.particleSize}
       />
 
-      <JourneyModel scene={scene} isMobile={isMobile} />
+      <JourneyModel
+        scene={scene}
+        isMobile={isMobile}
+        enableTransmission={enableTransmission}
+      />
 
       <ContactShadows
         position={[0, -2.5, 0]}
@@ -253,7 +266,7 @@ function SceneContent({
 
       <Environment preset="studio" />
 
-      {!isMobile && (
+      {postProcessing && (
         <PostFXBoundary>
           <EffectComposer>
             <Bloom
@@ -272,30 +285,33 @@ function SceneContent({
 }
 
 // ─── Public export ────────────────────────────────────────────────────────────
-export function JourneyCanvas({
-  activeSceneIndex,
-  isMobile,
-}: {
-  activeSceneIndex: number;
-  isMobile: boolean;
-}) {
+export function JourneyCanvas({ activeSceneIndex }: { activeSceneIndex: number }) {
+  const { isMobile, transmission, postProcessing, shadows, particleDensity, dpr, antialias } =
+    useDevice();
+
   return (
     <Canvas
       aria-hidden="true"
       camera={{ position: [0, 0.5, 5.5], fov: 46 }}
-      dpr={isMobile ? [1, 1.5] : [1, 2]}
+      dpr={dpr}
       gl={{
-        antialias: !isMobile,
+        antialias,
         alpha: false,
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.25,
         failIfMajorPerformanceCaveat: false,
       }}
-      shadows={!isMobile}
+      shadows={shadows}
       style={{ width: "100%", height: "100%" }}
     >
       <Suspense fallback={null}>
-        <SceneContent activeSceneIndex={activeSceneIndex} isMobile={isMobile} />
+        <SceneContent
+          activeSceneIndex={activeSceneIndex}
+          isMobile={isMobile}
+          enableTransmission={transmission}
+          postProcessing={postProcessing}
+          particleDensity={particleDensity}
+        />
       </Suspense>
     </Canvas>
   );
