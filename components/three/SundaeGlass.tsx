@@ -160,28 +160,28 @@ export function SundaeGlass({
       isMobile
         ? new THREE.MeshStandardMaterial({
             color: item.color,
-            roughness: 0.36,
+            roughness: 0.55,
             metalness: 0,
           })
         : useTransmission
           ? new THREE.MeshPhysicalMaterial({
               color: item.color,
-              roughness: 0.36,
+              roughness: 0.55,
               metalness: 0,
-              clearcoat: 0.35,
-              clearcoatRoughness: 0.55,
-              sheen: 0.2,
+              clearcoat: 0.08,
+              clearcoatRoughness: 0.6,
+              sheen: 0.15,
               sheenColor: new THREE.Color(item.color).lerp(new THREE.Color("#ffffff"), 0.6),
               transmission: 0.08,
               thickness: 0.45,
             })
           : new THREE.MeshPhysicalMaterial({
               color: item.color,
-              roughness: 0.36,
+              roughness: 0.55,
               metalness: 0,
-              clearcoat: 0.35,
-              clearcoatRoughness: 0.55,
-              sheen: 0.2,
+              clearcoat: 0.08,
+              clearcoatRoughness: 0.6,
+              sheen: 0.15,
               sheenColor: new THREE.Color(item.color).lerp(new THREE.Color("#ffffff"), 0.6),
             }),
     [item.color, isMobile, useTransmission]
@@ -192,28 +192,28 @@ export function SundaeGlass({
       isMobile
         ? new THREE.MeshStandardMaterial({
             color: item.accentColor,
-            roughness: 0.36,
+            roughness: 0.55,
             metalness: 0,
           })
         : useTransmission
           ? new THREE.MeshPhysicalMaterial({
               color: item.accentColor,
-              roughness: 0.36,
+              roughness: 0.55,
               metalness: 0,
-              clearcoat: 0.35,
-              clearcoatRoughness: 0.55,
-              sheen: 0.2,
+              clearcoat: 0.08,
+              clearcoatRoughness: 0.6,
+              sheen: 0.15,
               sheenColor: new THREE.Color(item.accentColor).lerp(new THREE.Color("#ffffff"), 0.6),
               transmission: 0.08,
               thickness: 0.45,
             })
           : new THREE.MeshPhysicalMaterial({
               color: item.accentColor,
-              roughness: 0.36,
+              roughness: 0.55,
               metalness: 0,
-              clearcoat: 0.35,
-              clearcoatRoughness: 0.55,
-              sheen: 0.2,
+              clearcoat: 0.08,
+              clearcoatRoughness: 0.6,
+              sheen: 0.15,
               sheenColor: new THREE.Color(item.accentColor).lerp(new THREE.Color("#ffffff"), 0.6),
             }),
     [item.accentColor, isMobile, useTransmission]
@@ -252,9 +252,9 @@ export function SundaeGlass({
     () =>
       new THREE.MeshPhysicalMaterial({
         color: "#FFFBF5",
-        roughness: 0.5,
+        roughness: 0.55,
         metalness: 0,
-        clearcoat: 0.3,
+        clearcoat: 0.1,
         clearcoatRoughness: 0.6,
       }),
     []

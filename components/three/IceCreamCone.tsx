@@ -204,26 +204,26 @@ export function IceCreamCone({
   const scoop1Mat = useMemo(
     () =>
       isMobile
-        ? new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0 })
+        ? new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0 })
         : useTransmission
           ? new THREE.MeshPhysicalMaterial({
               color,
-              roughness: 0.28,
+              roughness: 0.55,
               metalness: 0,
-              clearcoat: 0.45,
-              clearcoatRoughness: 0.45,
-              sheen: 0.3,
+              clearcoat: 0.08,
+              clearcoatRoughness: 0.6,
+              sheen: 0.15,
               sheenColor: new THREE.Color(color).lerp(new THREE.Color("#ffffff"), 0.5),
               transmission: 0.08,
               thickness: 0.45,
             })
           : new THREE.MeshPhysicalMaterial({
               color,
-              roughness: 0.28,
+              roughness: 0.55,
               metalness: 0,
-              clearcoat: 0.45,
-              clearcoatRoughness: 0.45,
-              sheen: 0.3,
+              clearcoat: 0.08,
+              clearcoatRoughness: 0.6,
+              sheen: 0.15,
               sheenColor: new THREE.Color(color).lerp(new THREE.Color("#ffffff"), 0.5),
             }),
     [color, isMobile, useTransmission]
@@ -232,26 +232,26 @@ export function IceCreamCone({
   const scoop2Mat = useMemo(
     () =>
       isMobile
-        ? new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.35, metalness: 0 })
+        ? new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.55, metalness: 0 })
         : useTransmission
           ? new THREE.MeshPhysicalMaterial({
               color: accentColor,
-              roughness: 0.28,
+              roughness: 0.55,
               metalness: 0,
-              clearcoat: 0.45,
-              clearcoatRoughness: 0.45,
-              sheen: 0.3,
+              clearcoat: 0.08,
+              clearcoatRoughness: 0.6,
+              sheen: 0.15,
               sheenColor: new THREE.Color(accentColor).lerp(new THREE.Color("#ffffff"), 0.5),
               transmission: 0.08,
               thickness: 0.45,
             })
           : new THREE.MeshPhysicalMaterial({
               color: accentColor,
-              roughness: 0.28,
+              roughness: 0.55,
               metalness: 0,
-              clearcoat: 0.45,
-              clearcoatRoughness: 0.45,
-              sheen: 0.3,
+              clearcoat: 0.08,
+              clearcoatRoughness: 0.6,
+              sheen: 0.15,
               sheenColor: new THREE.Color(accentColor).lerp(new THREE.Color("#ffffff"), 0.5),
             }),
     [accentColor, isMobile, useTransmission]
@@ -260,22 +260,22 @@ export function IceCreamCone({
   const scoop3Mat = useMemo(
     () =>
       isMobile
-        ? new THREE.MeshStandardMaterial({ color: "#FFF5E0", roughness: 0.5, metalness: 0 })
+        ? new THREE.MeshStandardMaterial({ color: "#FFF5E0", roughness: 0.6, metalness: 0 })
         : useTransmission
           ? new THREE.MeshPhysicalMaterial({
               color: "#FFF5E0",
-              roughness: 0.42,
+              roughness: 0.6,
               metalness: 0,
-              clearcoat: 0.2,
+              clearcoat: 0.08,
               clearcoatRoughness: 0.7,
               transmission: 0.06,
               thickness: 0.4,
             })
           : new THREE.MeshPhysicalMaterial({
               color: "#FFF5E0",
-              roughness: 0.42,
+              roughness: 0.6,
               metalness: 0,
-              clearcoat: 0.2,
+              clearcoat: 0.08,
               clearcoatRoughness: 0.7,
             }),
     [isMobile, useTransmission]
@@ -446,10 +446,10 @@ export function IceCreamCone({
         <mesh geometry={swirlGeo} castShadow>
           <meshPhysicalMaterial
             color="#FFF5E0"
-            roughness={0.32}
+            roughness={0.52}
             metalness={0}
-            clearcoat={0.4}
-            clearcoatRoughness={0.5}
+            clearcoat={0.1}
+            clearcoatRoughness={0.6}
           />
         </mesh>
         {/* Taper peak — cone at swirl apex */}
@@ -457,10 +457,10 @@ export function IceCreamCone({
           <coneGeometry args={[0.06, 0.16, 6]} />
           <meshPhysicalMaterial
             color="#FFF5E0"
-            roughness={0.32}
+            roughness={0.52}
             metalness={0}
-            clearcoat={0.4}
-            clearcoatRoughness={0.5}
+            clearcoat={0.1}
+            clearcoatRoughness={0.6}
           />
         </mesh>
       </group>

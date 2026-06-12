@@ -107,7 +107,7 @@ function SceneLights({ scene }: { scene: SceneDefinition }) {
 
   return (
     <>
-      <ambientLight intensity={0.3} />
+      <hemisphereLight intensity={0.35} color="#FFF6E8" groundColor="#1A0E08" />
       <directionalLight
         ref={keyRef}
         position={[-3, 3.5, 5]}
@@ -264,19 +264,19 @@ function SceneContent({
         color="#000000"
       />
 
-      <Environment files="/hdri/studio_small_03_1k.hdr" />
+      <Environment files="/hdri/studio_small_03_1k.hdr" environmentIntensity={0.6} />
 
       {postProcessing && (
         <PostFXBoundary>
           <EffectComposer>
             <Bloom
-              intensity={0.8}
-              luminanceThreshold={0.45}
+              intensity={0.4}
+              luminanceThreshold={0.88}
               luminanceSmoothing={0.88}
-              radius={0.8}
+              radius={0.6}
               mipmapBlur
             />
-            <Vignette eskil={false} offset={0.1} darkness={0.75} />
+            <Vignette eskil={false} offset={0.1} darkness={0.6} />
           </EffectComposer>
         </PostFXBoundary>
       )}
@@ -298,7 +298,7 @@ export function JourneyCanvas({ activeSceneIndex }: { activeSceneIndex: number }
         antialias,
         alpha: false,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.25,
+        toneMappingExposure: 1.05,
         failIfMajorPerformanceCaveat: false,
       }}
       shadows={shadows}

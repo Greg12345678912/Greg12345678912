@@ -58,7 +58,7 @@ export const SCENES: SceneDefinition[] = [
     eyebrowColor: "#FFB347",
     accentColor: "#FF8C00",
     keyLight: "#FFFBE0",
-    keyIntensity: 4.0,
+    keyIntensity: 2.4,
     fillLight: "#FFB347",
     rimLight: "#B8D4FF",
     cameraFov: 44,

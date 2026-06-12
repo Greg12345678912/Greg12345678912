@@ -217,12 +217,12 @@ function BuilderModel({ color, accentColor, baseId, isMobile }: BuilderModelProp
 
       {/* Scoop 1 — bottom */}
       <mesh geometry={scoop1Geo} position={[0, 0.52, 0]} castShadow>
-        <meshStandardMaterial ref={mat1} color={color} roughness={0.35} metalness={0} />
+        <meshStandardMaterial ref={mat1} color={color} roughness={0.55} metalness={0} />
       </mesh>
 
       {/* Scoop 2 — top */}
       <mesh geometry={scoop2Geo} position={[0.08, 1.18, 0]} castShadow>
-        <meshStandardMaterial ref={mat2} color={accentColor} roughness={0.35} metalness={0} />
+        <meshStandardMaterial ref={mat2} color={accentColor} roughness={0.55} metalness={0} />
       </mesh>
     </group>
   );
@@ -279,7 +279,7 @@ export function BuilderCanvas({ flavorItem, baseId, isMobile = false }: BuilderC
         dpr={isMobile ? 1 : [1, 2]}
         style={{ width: "100%", height: "100%", background: "transparent" }}
       >
-        <ambientLight intensity={0.6} />
+        <hemisphereLight intensity={0.55} color="#FFF6E8" groundColor="#1A0E08" />
         <directionalLight
           position={[3, 6, 4]}
           intensity={1.4}
@@ -306,7 +306,7 @@ export function BuilderCanvas({ flavorItem, baseId, isMobile = false }: BuilderC
           />
         )}
 
-        <Environment files="/hdri/potsdamer_platz_1k.hdr" />
+        <Environment files="/hdri/potsdamer_platz_1k.hdr" environmentIntensity={0.6} />
       </Canvas>
     </CanvasErrorBoundary>
   );
