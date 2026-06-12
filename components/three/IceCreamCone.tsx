@@ -4,6 +4,7 @@ import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { easeOutBack, easeOutCubic, localProgress } from "@/lib/easing";
+import { makeScoopGeometry, makeMeltSkirtGeometry } from "@/lib/scoopGeometry";
 
 interface IceCreamConeProps {
   color?: string;
@@ -69,26 +70,6 @@ function makeWaffleTexture(): THREE.CanvasTexture {
   tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(2, 3);
   return tex;
-}
-
-/** Displaced sphere geometry for organic scoop look */
-function makeScoopGeometry(radius: number, seed: number, segs: number) {
-  const geo = new THREE.SphereGeometry(radius, segs, segs);
-  const pos = geo.attributes.position as THREE.BufferAttribute;
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i);
-    const y = pos.getY(i);
-    const z = pos.getZ(i);
-    const len = Math.sqrt(x * x + y * y + z * z);
-    // Organic surface noise
-    const noise =
-      Math.sin(x * 9.3 + seed) * Math.cos(y * 7.1 + seed * 0.7) * Math.sin(z * 8.5) * 0.04 +
-      Math.sin(x * 4.1 + seed * 1.3) * Math.cos(z * 5.7) * 0.025;
-    const factor = 1 + noise / len;
-    pos.setXYZ(i, x * factor, y * factor, z * factor);
-  }
-  geo.computeVertexNormals();
-  return geo;
 }
 
 /** Helical path for soft-serve swirl */
@@ -160,7 +141,7 @@ export function IceCreamCone({
     }
   }, [assemblyId]);
 
-  const segs = isMobile ? 20 : 32;
+  const segs = isMobile ? 24 : 48;
   const swirlSegs = isMobile ? 50 : 80;
 
   const waffleTexture = useMemo(() => {
@@ -184,6 +165,10 @@ export function IceCreamCone({
   const swirlGeo = useMemo(() => makeSwirlGeometry(isMobile ? 3 : 4, swirlSegs), [isMobile, swirlSegs]);
   const drip1Geo = useMemo(() => makeDripGeometry(1, 0.3), []);
   const drip2Geo = useMemo(() => makeDripGeometry(-0.7, 0.8), []);
+  const skirtSegs = isMobile ? 28 : 48;
+  const skirtConeGeo = useMemo(() => makeMeltSkirtGeometry(0.64, 0.4, 3.1, skirtSegs), [skirtSegs]);
+  const skirtMidGeo = useMemo(() => makeMeltSkirtGeometry(0.46, 0.24, 5.7, skirtSegs), [skirtSegs]);
+  const skirtTopGeo = useMemo(() => makeMeltSkirtGeometry(0.33, 0.18, 8.2, skirtSegs), [skirtSegs]);
   const liveDripGeo = useMemo(() => {
     const g = new THREE.CylinderGeometry(0.02, 0.044, 0.85, 6);
     g.translate(0, -0.425, 0); // pivot at top — hangs downward
@@ -298,6 +283,29 @@ export function IceCreamCone({
     [color, isMobile]
   );
 
+  // Melted ice cream is wet — darker and glossier than the scoop it came from
+  const skirt1Mat = useMemo(
+    () =>
+      isMobile
+        ? new THREE.MeshStandardMaterial({ color: new THREE.Color(color).multiplyScalar(0.94), roughness: 0.3, metalness: 0 })
+        : new THREE.MeshPhysicalMaterial({ color: new THREE.Color(color).multiplyScalar(0.94), roughness: 0.3, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.25 }),
+    [color, isMobile]
+  );
+  const skirt2Mat = useMemo(
+    () =>
+      isMobile
+        ? new THREE.MeshStandardMaterial({ color: new THREE.Color(accentColor).multiplyScalar(0.94), roughness: 0.3, metalness: 0 })
+        : new THREE.MeshPhysicalMaterial({ color: new THREE.Color(accentColor).multiplyScalar(0.94), roughness: 0.3, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.25 }),
+    [accentColor, isMobile]
+  );
+  const skirt3Mat = useMemo(
+    () =>
+      isMobile
+        ? new THREE.MeshStandardMaterial({ color: "#F4E8D0", roughness: 0.3, metalness: 0 })
+        : new THREE.MeshPhysicalMaterial({ color: "#F4E8D0", roughness: 0.3, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.25 }),
+    [isMobile]
+  );
+
   const cherryMat = useMemo(
     () =>
       isMobile
@@ -345,7 +353,7 @@ export function IceCreamCone({
     if (scoop1Ref.current) {
       const lp = easeOutBack(localProgress(p, 0.18, 0.42));
       scoop1Ref.current.scale.setScalar(lp);
-      scoop1Ref.current.position.y = 0.52 - (1 - easeOutCubic(localProgress(p, 0.18, 0.42))) * 0.5;
+      scoop1Ref.current.position.y = 0.38 - (1 - easeOutCubic(localProgress(p, 0.18, 0.42))) * 0.5;
     }
 
     // Scoop 2
@@ -433,7 +441,7 @@ export function IceCreamCone({
       <mesh ref={coneRef} geometry={coneGeometry} material={coneMat} position={[0, -0.5, 0]} scale={0} />
 
       {/* Scoop 1 — base */}
-      <mesh ref={scoop1Ref} geometry={scoop1Geo} material={scoop1Mat} position={[0, 0.52, 0]} scale={0} castShadow />
+      <mesh ref={scoop1Ref} geometry={scoop1Geo} material={scoop1Mat} position={[0, 0.38, 0]} scale={0} castShadow />
 
       {/* Scoop 2 */}
       <mesh ref={scoop2Ref} geometry={scoop2Geo} material={scoop2Mat} position={[0.1, 1.18, 0]} scale={0} castShadow />
@@ -467,6 +475,10 @@ export function IceCreamCone({
 
       {/* Drips */}
       <group ref={dripsRef} scale={0}>
+        {/* Melt skirts — sagging collars at the cone rim and scoop junctions */}
+        <mesh geometry={skirtConeGeo} material={skirt1Mat} position={[0, -0.46, 0]} />
+        <mesh geometry={skirtMidGeo} material={skirt2Mat} position={[0.05, 1.02, 0]} />
+        <mesh geometry={skirtTopGeo} material={skirt3Mat} position={[-0.02, 1.58, 0]} />
         <mesh geometry={drip1Geo} material={sauceMat} />
         <mesh geometry={drip2Geo}>
           <meshPhysicalMaterial

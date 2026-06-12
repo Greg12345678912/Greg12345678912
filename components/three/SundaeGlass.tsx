@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { MenuItem } from "@/store/useStore";
 import { easeOutBack, easeOutCubic, localProgress } from "@/lib/easing";
+import { makeScoopGeometry, makeMeltSkirtGeometry } from "@/lib/scoopGeometry";
 
 interface SundaeGlassProps {
   item: MenuItem;
@@ -15,23 +16,6 @@ interface SundaeGlassProps {
   isMobile?: boolean;
   enableTransmission?: boolean;
   instantComplete?: boolean;
-}
-
-/** Displaced sphere for organic scoop */
-function makeScoopGeo(radius: number, seed: number, segs: number) {
-  const geo = new THREE.SphereGeometry(radius, segs, segs);
-  const pos = geo.attributes.position as THREE.BufferAttribute;
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i); const y = pos.getY(i); const z = pos.getZ(i);
-    const len = Math.sqrt(x * x + y * y + z * z);
-    const n =
-      Math.sin(x * 9.1 + seed) * Math.cos(y * 7.3) * Math.sin(z * 8.7) * 0.038 +
-      Math.sin(x * 4.3 + seed * 1.2) * Math.cos(z * 5.5) * 0.022;
-    const f = 1 + n / len;
-    pos.setXYZ(i, x * f, y * f, z * f);
-  }
-  geo.computeVertexNormals();
-  return geo;
 }
 
 /** Whipped cream swirl */
@@ -96,7 +80,7 @@ export function SundaeGlass({
     }
   }, [assemblyId]);
 
-  const segs = isMobile ? 20 : 32;
+  const segs = isMobile ? 24 : 48;
 
   // --- Geometries ---
   const cylinderGeo = useMemo(() => {
@@ -111,8 +95,12 @@ export function SundaeGlass({
     return new THREE.LatheGeometry(pts, isMobile ? 20 : 28, 0, Math.PI * 2);
   }, [isMobile]);
 
-  const scoop1Geo = useMemo(() => makeScoopGeo(0.5, 2.33, segs), [segs]);
-  const scoop2Geo = useMemo(() => makeScoopGeo(0.38, 5.77, segs), [segs]);
+  const scoop1Geo = useMemo(() => makeScoopGeometry(0.5, 2.33, segs), [segs]);
+  const scoop2Geo = useMemo(() => makeScoopGeometry(0.38, 5.77, segs), [segs]);
+  const skirtGeo = useMemo(
+    () => makeMeltSkirtGeometry(0.55, 0.3, 4.4, isMobile ? 28 : 48),
+    [isMobile]
+  );
   const whipGeo = useMemo(() => makeWhipGeometry(isMobile ? 2.5 : 3.5, isMobile ? 50 : 70), [isMobile]);
   const sauce1Geo = useMemo(() => makeSauceDrizzle(0, 0.42), []);
   const sauce2Geo = useMemo(() => makeSauceDrizzle(Math.PI * 0.7, 0.38), []);
@@ -246,6 +234,25 @@ export function SundaeGlass({
         opacity: 0.9,
       }),
     [item.accentColor]
+  );
+
+  // Melted ice cream sagging over the glass rim — wet, so glossier than the scoop
+  const skirtMat = useMemo(
+    () =>
+      isMobile
+        ? new THREE.MeshStandardMaterial({
+            color: new THREE.Color(item.color).multiplyScalar(0.94),
+            roughness: 0.3,
+            metalness: 0,
+          })
+        : new THREE.MeshPhysicalMaterial({
+            color: new THREE.Color(item.color).multiplyScalar(0.94),
+            roughness: 0.3,
+            metalness: 0,
+            clearcoat: 0.5,
+            clearcoatRoughness: 0.25,
+          }),
+    [item.color, isMobile]
   );
 
   const whipMat = useMemo(
@@ -408,6 +415,8 @@ export function SundaeGlass({
       <group ref={sauceRef} position={[0, 1.0, 0]} scale={0}>
         <mesh geometry={sauce1Geo} material={sauceMat} />
         <mesh geometry={sauce2Geo} material={sauce2Mat} />
+        {/* Melt skirt over the glass rim */}
+        <mesh geometry={skirtGeo} material={skirtMat} position={[0, -0.2, 0]} />
       </group>
 
       {/* Toppings */}

@@ -5,31 +5,13 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { easeOutBack } from "@/lib/easing";
+import { makeScoopGeometry, makeMeltSkirtGeometry } from "@/lib/scoopGeometry";
 import type { BaseId } from "@/lib/builderData";
 import type { MenuItem } from "@/store/useStore";
 
 // ---------------------------------------------------------------------------
 // Geometry helpers
 // ---------------------------------------------------------------------------
-
-function makeScoopGeo(radius: number, seed: number, segs: number): THREE.SphereGeometry {
-  const geo = new THREE.SphereGeometry(radius, segs, segs);
-  const pos = geo.attributes.position as THREE.BufferAttribute;
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i);
-    const y = pos.getY(i);
-    const z = pos.getZ(i);
-    const len = Math.sqrt(x * x + y * y + z * z);
-    if (len === 0) continue;
-    const noise =
-      Math.sin(x * 9.3 + seed) * Math.cos(y * 7.1 + seed * 0.7) * Math.sin(z * 8.5) * 0.04 +
-      Math.sin(x * 4.1 + seed * 1.3) * Math.cos(z * 5.7) * 0.025;
-    const factor = 1 + noise / len;
-    pos.setXYZ(i, x * factor, y * factor, z * factor);
-  }
-  geo.computeVertexNormals();
-  return geo;
-}
 
 function makeConeGeo(segs: number): THREE.LatheGeometry {
   const pts: THREE.Vector2[] = [];
@@ -74,6 +56,8 @@ function BuilderModel({ color, accentColor, baseId, isMobile }: BuilderModelProp
 
   const mat1 = useRef<THREE.MeshStandardMaterial>(null);
   const mat2 = useRef<THREE.MeshStandardMaterial>(null);
+  const skirtMat1 = useRef<THREE.MeshPhysicalMaterial>(null);
+  const skirtMat2 = useRef<THREE.MeshPhysicalMaterial>(null);
 
   // Base swap animation state
   const prevBaseId = useRef<BaseId>(baseId);
@@ -81,10 +65,18 @@ function BuilderModel({ color, accentColor, baseId, isMobile }: BuilderModelProp
   const baseSwapPhase = useRef<"in" | "out" | "done">("done");
   const pendingBaseId = useRef<BaseId>(baseId);
 
-  const segs = isMobile ? 18 : 28;
+  const segs = isMobile ? 24 : 44;
 
-  const scoop1Geo = useMemo(() => makeScoopGeo(0.72, 1.23, segs), [segs]);
-  const scoop2Geo = useMemo(() => makeScoopGeo(0.58, 4.71, segs), [segs]);
+  const scoop1Geo = useMemo(() => makeScoopGeometry(0.72, 1.23, segs), [segs]);
+  const scoop2Geo = useMemo(() => makeScoopGeometry(0.58, 4.71, segs), [segs]);
+  const skirtRimGeo = useMemo(
+    () => makeMeltSkirtGeometry(0.64, 0.4, 3.1, isMobile ? 28 : 44),
+    [isMobile]
+  );
+  const skirtMidGeo = useMemo(
+    () => makeMeltSkirtGeometry(0.46, 0.24, 5.7, isMobile ? 28 : 44),
+    [isMobile]
+  );
   const coneGeo = useMemo(() => makeConeGeo(isMobile ? 16 : 24), [isMobile]);
   const cupGeo = useMemo(() => makeCupGeo(isMobile ? 16 : 24), [isMobile]);
 
@@ -169,6 +161,8 @@ function BuilderModel({ color, accentColor, baseId, isMobile }: BuilderModelProp
     currentColor2.current.lerp(targetColor2.current, lerpSpeed);
     if (mat1.current) mat1.current.color.copy(currentColor1.current);
     if (mat2.current) mat2.current.color.copy(currentColor2.current);
+    if (skirtMat1.current) skirtMat1.current.color.copy(currentColor1.current).multiplyScalar(0.94);
+    if (skirtMat2.current) skirtMat2.current.color.copy(currentColor2.current).multiplyScalar(0.94);
 
     // Base swap animation
     if (baseSwapPhase.current !== "done" && baseGroupRef.current) {
@@ -216,13 +210,21 @@ function BuilderModel({ color, accentColor, baseId, isMobile }: BuilderModelProp
       </group>
 
       {/* Scoop 1 — bottom */}
-      <mesh geometry={scoop1Geo} position={[0, 0.52, 0]} castShadow>
+      <mesh geometry={scoop1Geo} position={[0, 0.38, 0]} castShadow>
         <meshStandardMaterial ref={mat1} color={color} roughness={0.55} metalness={0} />
       </mesh>
 
       {/* Scoop 2 — top */}
       <mesh geometry={scoop2Geo} position={[0.08, 1.18, 0]} castShadow>
         <meshStandardMaterial ref={mat2} color={accentColor} roughness={0.55} metalness={0} />
+      </mesh>
+
+      {/* Melt skirts — wet ice cream sagging over the base rim and scoop seam */}
+      <mesh geometry={skirtRimGeo} position={[0, -0.46, 0]}>
+        <meshPhysicalMaterial ref={skirtMat1} color={color} roughness={0.3} metalness={0} clearcoat={0.5} clearcoatRoughness={0.25} />
+      </mesh>
+      <mesh geometry={skirtMidGeo} position={[0.04, 1.0, 0]}>
+        <meshPhysicalMaterial ref={skirtMat2} color={accentColor} roughness={0.3} metalness={0} clearcoat={0.5} clearcoatRoughness={0.25} />
       </mesh>
     </group>
   );
