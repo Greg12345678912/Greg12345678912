@@ -306,7 +306,7 @@ export function BuilderCanvas({ flavorItem, baseId, isMobile = false }: BuilderC
           />
         )}
 
-        <Environment preset="city" />
+        <Environment files="/hdri/potsdamer_platz_1k.hdr" />
       </Canvas>
     </CanvasErrorBoundary>
   );

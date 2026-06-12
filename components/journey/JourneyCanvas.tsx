@@ -264,7 +264,7 @@ function SceneContent({
         color="#000000"
       />
 
-      <Environment preset="studio" />
+      <Environment files="/hdri/studio_small_03_1k.hdr" />
 
       {postProcessing && (
         <PostFXBoundary>
